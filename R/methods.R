@@ -435,13 +435,7 @@ setMethod("plot", signature(x = "biosign"),
     if(is.null(file.pdfC)) {
         dev.new()
     } else {
-        if(grepl("pdf$", file.pdfC)) {
-            pdf(file.pdfC)
-        } else if(grepl("png$", file.pdfC)) {
-            png(file.pdfC)
-        } else
-            stop("'file.pdfC' argument must have a '.pdf' extension",
-                 call. = FALSE)
+        pdf(file.pdfC)
     }
 
     switch(typeC,
