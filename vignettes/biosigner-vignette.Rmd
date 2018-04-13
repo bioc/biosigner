@@ -10,7 +10,7 @@ vignette: >
   %\VignetteEncoding{UTF-8}
 bibliography: "biosigner-vignette.bib"
 output:
-  BiocStyle::pdf_document:
+  BiocStyle::html_document:
      fig_caption: yes
 ---
 
@@ -196,13 +196,13 @@ set.seed(NULL)
 set.seed(123)
 diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5,
 plotL = FALSE)
-plot(diaSign, file.pdfC = "figures/diasign.png")
+plot(diaSign, file.pdfC = "figures/diasign.pdf")
 set.seed(NULL)
 ```
 ![**Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and *SVM*
 classifiers extracted from the diaplasma dataset. The *S* tier corresponds to the
 final metabolite signature, i.e., metabolites which passed through all the
-selection steps.](figures/diasign.png)
+selection steps.](figures/diasign.pdf)
 
 The arguments are:
 
@@ -262,11 +262,11 @@ plot(diaSign, typeC = "boxplot")
 ```
 
 ```{r boxplot, echo = FALSE}
-plot(diaSign, typeC = "boxplot", file.pdfC = "figures/diasign_box.png")
+plot(diaSign, typeC = "boxplot", file.pdfC = "figures/diasign_box.pdf")
 ```
 ![**Figure 3:** Individual boxplots of the features selected for at least one of
 the classification methods. Features selected for a single classifier are
-colored (*red* for PLS-DA, *green* for Random Forest and *blue* for SVM).](figures/diasign_box.png)
+colored (*red* for PLS-DA, *green* for Random Forest and *blue* for SVM).](figures/diasign_box.pdf)
 
 Let us see the metadata of the *complete* signature:
 
@@ -303,10 +303,10 @@ set.seed(123)
 diaTrain <- biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
 bootI = 5, plotL = FALSE)
 set.seed(NULL)
-plot(diaTrain, file.pdfC = "figures/diatrain.png")
+plot(diaTrain, file.pdfC = "figures/diatrain.pdf")
 ```
 
-![**Figure 4:** Signatures from the training data set](figures/diatrain.png)
+![**Figure 4:** Signatures from the training data set](figures/diatrain.pdf)
 
 We extract the **fitted** types on the training dataset restricted to the *S*
 signatures:
@@ -435,10 +435,10 @@ sacSign <- biosign(sacurine[["dataMatrix"]],
 sacurine[["sampleMetadata"]][, "gender"],
 methodVc = "plsda", plotL = FALSE)
 set.seed(NULL)
-plot(sacSign, file.pdfC = "figures/sacsign.png")
+plot(sacSign, file.pdfC = "figures/sacsign.pdf")
 ```
 
-![**Figure 5:** PLS-DA signature from the 'sacurine' data set.](figures/sacsign.png)
+![**Figure 5:** PLS-DA signature from the 'sacurine' data set.](figures/sacsign.pdf)
 
 ## Apples spikes with known compounds (metabolomics)
 
@@ -547,10 +547,10 @@ set.seed(123)
 golubSign <- biosign(golubMN[, varSubVi], leukemiaFc, methodVc = "svm",
 plotL = FALSE)
 set.seed(NULL)
-plot(golubSign, file.pdfC = "figures/golsign.png")
+plot(golubSign, file.pdfC = "figures/golsign.pdf")
 ```
 
-![**Figure 6:** SVM signature from the *golub* data set.](figures/golsign.png)
+![**Figure 6:** SVM signature from the *golub* data set.](figures/golsign.pdf)
 
 The computation results in a signature of 2 features only and a sparse SVM model
 performing almost as well (94.4% accuracy) as the model trained on the dataset
