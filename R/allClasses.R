@@ -21,7 +21,7 @@
 #' @slot xSubMN matrix: dataset restricted to the 'S' tier
 #' @slot AS list: 'AS' signatures and corresponding trained classifiers, in addition to the dataset restricted
 #' to tiers 'S' and 'A' ('xMN') and the labels ('yFc')
-#' @slot eset ExpressionSet: when 'biosign' has been applied to an ExpressionSet, the instance will additional
+#' @slot eset ExpressionSet: when 'biosign' has been applied to an ExpressionSet, the instance with additional
 #' columns in fData containing the selected features is stored here
 #'
 #' @examples

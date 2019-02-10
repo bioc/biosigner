@@ -6,8 +6,8 @@ setMethod("biosign", signature(x = "ExpressionSet"),
             if(!(y %in% colnames(Biobase::pData(x)))) {
               stop("'y' must be the name of a column of the phenoData slot of the 'ExpressionSet' object", call. = FALSE)
             } else {
-              rspFcVcn <- Biobase::pData(x)[, y]
-              bsg <- biosign(t(Biobase::exprs(x)), rspFcVcn, ...)
+              rspFcVc <- Biobase::pData(x)[, y]
+              bsg <- biosign(t(Biobase::exprs(x)), rspFcVc, ...)
             }
             
             tierMC <- bsg@tierMC
@@ -174,16 +174,17 @@ setMethod("biosign", signature(x = "matrix"),
             }
             
             if(is.character(y)) {
-              yFc <- factor(y)
+              y <- factor(y)
               warning("'y' character vector converted to a factor with levels '",
                       paste(levels(y), collapse = "', '"),
                       "'",
                       call. = FALSE)
+            } else if(!is.factor(y)) {
+              stop("'y' must be a character vector or a factor", call. = FALSE)
             }
             
-            if(!is.factor(y)) {
-              stop("'y' must be a factor", call. = FALSE)
-            } else if(length(y) != nrow(xMN)) {
+
+            if(length(y) != nrow(xMN)) {
               stop("'y' factor length must be equal to the number of rows of 'x'", call. = FALSE)
             } else if(length(levels(y)) != 2) {
               stop("'y' must have two levels", call. = FALSE)

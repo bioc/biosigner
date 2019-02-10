@@ -29,7 +29,7 @@ classifier}
 \item{\code{AS}}{list: 'AS' signatures and corresponding trained classifiers, in addition to the dataset restricted
 to tiers 'S' and 'A' ('xMN') and the labels ('yFc')}
 
-\item{\code{eset}}{ExpressionSet: when 'biosign' has been applied to an ExpressionSet, the instance will additional
+\item{\code{eset}}{ExpressionSet: when 'biosign' has been applied to an ExpressionSet, the instance with additional
 columns in fData containing the selected features is stored here}
 }}
 

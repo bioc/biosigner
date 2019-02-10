@@ -1,41 +1,56 @@
+CHANGES IN VERSION 1.11.4
+------------------------------
+
+BUG FIXED
+
+    o error message when y is a character but not a factor is now fixed
+
+
 CHANGES IN VERSION 1.11.2
 ------------------------------
+
 NEW FEATURES
 
     o Application to ExpressionSet: tiers now returned in the fData
 
 CHANGES IN VERSION 1.7.4
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o unit testing on Windows 32 bits disabled
     
 CHANGES IN VERSION 1.7.2
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o modification in unit testing
 
 CHANGES IN VERSION 1.3.6
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o minor internal modification for compatibility with the Galaxy module
 
 CHANGES IN VERSION 1.3.4
 ------------------------------
+
 MINOR MODIFICATIONS
 
     o minor modification in vignette
 
 CHANGES IN VERSION 1.3.2
 ------------------------------
+
 MINOR MODIFICATIONS
 
     o vignette now in pdf format
 
 CHANGES IN VERSION 1.1.14
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o Biobase import restricted to ExpressionSet, exprs, and pData
@@ -43,12 +58,14 @@ INTERNAL MODIFICATIONS
 
 CHANGES IN VERSION 1.1.12
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o minor modification in unit tests
 
 CHANGES IN VERSION 1.1.10
 ------------------------------
+
 NEW FEATURE
 
     o biosign can now be applied to an ExpressionSet object
@@ -60,12 +77,14 @@ INTERNAL MODIFICATIONS
 
 CHANGES IN VERSION 1.1.8
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o error message fixed when missing values in the accuracy vector obtained by the bootstrap step
 
 CHANGES IN VERSION 1.1.6
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o versioning update
@@ -73,6 +92,7 @@ INTERNAL MODIFICATIONS
 
 CHANGES IN VERSION 1.1.4
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o bug fixed (when tierMN contains 0 only)
@@ -80,6 +100,7 @@ INTERNAL MODIFICATIONS
 
 CHANGES IN VERSION 1.1.2
 ------------------------------
+
 INTERNAL MODIFICATIONS
 
     o unit tests: test_biosign_diaplasma and test_biosign_sacurine added
@@ -88,6 +109,7 @@ INTERNAL MODIFICATIONS
 
 CHANGES IN VERSION 1.1.0
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o Wellcome to the biosigner package for feature selection from omics datasets
@@ -98,24 +120,28 @@ PACKAGE MODIFICATION
 
 CHANGES IN VERSION 0.99.11
 ------------------------------
+
 BUG FIXED
 
     o in vignette (due to switch in S4 methods for ropls)
 
 CHANGES IN VERSION 0.99.10
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o grDevices, graphics, stats, utils imported in DESCRIPTION
 
 CHANGES IN VERSION 0.99.9
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o vignette update
 
 CHANGES IN VERSION 0.99.8
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o adding the import of the following function in NAMESPACE: abline arrows axis box boxplot dev.new dev.off head image layout median mtext par pdf rect tail title var
@@ -123,18 +149,21 @@ PACKAGE MODIFICATION
 
 CHANGES IN VERSION 0.99.7
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o additional unit test silenced in test_biosign_randomforest (because of errors on the moscato2 Windows 2008 platform)
 
 CHANGES IN VERSION 0.99.6
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o unit tests silenced in test_biosign_randomforest and test_biosign_predict (because of errors on the moscato2 Windows 2008 platform)
 
 CHANGES IN VERSION 0.99.5
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o importing of packages in NAMESPACE fixed
@@ -142,12 +171,14 @@ PACKAGE MODIFICATION
 
 CHANGES IN VERSION 0.99.4
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o correction of a bug in the test_biosign_plsdaF test function
 
 CHANGES IN VERSION 0.99.0
 ------------------------------
+
 PACKAGE MODIFICATION
 
     o set version number to 0.99.0 for Bioconductor
