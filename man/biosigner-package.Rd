@@ -2,8 +2,8 @@
 % Please edit documentation in R/biosigner-package.R
 \docType{package}
 \name{biosigner-package}
-\alias{biosigner}
 \alias{biosigner-package}
+\alias{biosigner}
 \title{Molecular signature discovery from omics data}
 \description{
 Feature selection is critical in omics data analysis to extract restricted
@@ -47,4 +47,3 @@ Philippe Rinaudo <phd.rinaudo@gmail.com> and Etienne Thevenot
 Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>
 }
 \keyword{package}
-

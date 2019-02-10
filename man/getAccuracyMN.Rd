@@ -50,10 +50,26 @@ diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 
 getAccuracyMN(diaSign)
 
+## ExpressionSet
+
+diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix), 
+                                 phenoData = new("AnnotatedDataFrame", 
+                                                 data = sampleMetadata), 
+                                 featureData = new("AnnotatedDataFrame", 
+                                                   data = variableMetadata),
+                                 experimentData = new("MIAME", 
+                                                      title = "diaplasma"))
+set.seed(123)
+diaSign <- biosign(diaSet, "type", bootI = 5)
+                                                                                                             
+Plsda <- opls(diaSet, "gender")
+diaSet <- getEset(sacPlsda)
+head(Biobase::pData(diaSet))
+head(Biobase::fData(diaSet))
+
 detach(diaplasma)
 
 }
 \author{
 Philippe Rinaudo and Etienne Thevenot (CEA)
 }
-

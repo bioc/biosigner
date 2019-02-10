@@ -11,13 +11,18 @@
 #' @seealso \code{\link{biosign}}
 #'
 #' @slot methodVc character vector: selected classifier(s) ('plsda', 'randomforest', or 'svm')
-#' @slot accuracyMN numeric matrix: balanced accuracies for the full models, and the models restricted to the 'S' and 'AS' signatures
-#' @slot tierMC character matrix: contains the tier ('S', 'A', 'B', 'C', 'D', or 'E') of each feature for each classifier
+#' @slot accuracyMN numeric matrix: balanced accuracies for the full models, and the models restricted to the 'S'
+#'  and 'AS' signatures
+#' @slot tierMC character matrix: contains the tier ('S', 'A', 'B', 'C', 'D', or 'E') of each feature for each
+#' classifier
 #' @slot yFc factor with two levels: response factor
 #' @slot modelLs list: selected classifier(s) trained on the subset restricted to the 'S' features
 #' @slot signatureLs list: 'S' signatures for each classifier
 #' @slot xSubMN matrix: dataset restricted to the 'S' tier
-#' @slot AS list: 'AS' signatures and corresponding trained classifiers, in addition to the dataset restricted to tiers 'S' and 'A' ('xMN') and the labels ('yFc')
+#' @slot AS list: 'AS' signatures and corresponding trained classifiers, in addition to the dataset restricted
+#' to tiers 'S' and 'A' ('xMN') and the labels ('yFc')
+#' @slot eset ExpressionSet: when 'biosign' has been applied to an ExpressionSet, the instance will additional
+#' columns in fData containing the selected features is stored here
 #'
 #' @examples
 #'
@@ -50,6 +55,7 @@ setClass("biosign",
              modelLs = "list",
              signatureLs = "list",
              xSubMN = "matrix",
-             AS = "list"))
+             AS = "list",
+             eset = "ExpressionSet"))
 
 

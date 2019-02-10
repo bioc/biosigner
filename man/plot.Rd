@@ -68,4 +68,3 @@ detach(diaplasma)
 \author{
 Philippe Rinaudo and Etienne Thevenot (CEA)
 }
-

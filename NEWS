@@ -1,3 +1,9 @@
+CHANGES IN VERSION 1.11.2
+------------------------------
+NEW FEATURES
+
+    o Application to ExpressionSet: tiers now returned in the fData
+
 CHANGES IN VERSION 1.7.4
 ------------------------------
 INTERNAL MODIFICATIONS

@@ -12,9 +12,11 @@ The biosigner object class
 \describe{
 \item{\code{methodVc}}{character vector: selected classifier(s) ('plsda', 'randomforest', or 'svm')}
 
-\item{\code{accuracyMN}}{numeric matrix: balanced accuracies for the full models, and the models restricted to the 'S' and 'AS' signatures}
+\item{\code{accuracyMN}}{numeric matrix: balanced accuracies for the full models, and the models restricted to the 'S'
+and 'AS' signatures}
 
-\item{\code{tierMC}}{character matrix: contains the tier ('S', 'A', 'B', 'C', 'D', or 'E') of each feature for each classifier}
+\item{\code{tierMC}}{character matrix: contains the tier ('S', 'A', 'B', 'C', 'D', or 'E') of each feature for each
+classifier}
 
 \item{\code{yFc}}{factor with two levels: response factor}
 
@@ -24,12 +26,18 @@ The biosigner object class
 
 \item{\code{xSubMN}}{matrix: dataset restricted to the 'S' tier}
 
-\item{\code{AS}}{list: 'AS' signatures and corresponding trained classifiers, in addition to the dataset restricted to tiers 'S' and 'A' ('xMN') and the labels ('yFc')}
+\item{\code{AS}}{list: 'AS' signatures and corresponding trained classifiers, in addition to the dataset restricted
+to tiers 'S' and 'A' ('xMN') and the labels ('yFc')}
+
+\item{\code{eset}}{ExpressionSet: when 'biosign' has been applied to an ExpressionSet, the instance will additional
+columns in fData containing the selected features is stored here}
 }}
+
 \section{Objects from the Class}{
  Objects can be created by calls of the form
 \code{new("biosign", ...)} or by calling the \code{biosign} function
 }
+
 \examples{
 
 ## loading the diaplasma dataset
@@ -53,10 +61,9 @@ diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 detach(diaplasma)
 
 }
-\author{
-Philippe Rinaudo and Etienne Thevenot (CEA)
-}
 \seealso{
 \code{\link{biosign}}
 }
-
+\author{
+Philippe Rinaudo and Etienne Thevenot (CEA)
+}
