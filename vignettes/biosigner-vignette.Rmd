@@ -153,20 +153,12 @@ We see that the **diaplasma** list contains three objects:
 We can observe that the 3 clinical covariates (diabetic *type*, *age*, and
 *bmi*) are stronlgy associated:
 
-```{r diaplasma_plot, eval=FALSE}
+```{r diaplasma_plot}
 with(sampleMetadata,
 plot(age, bmi, cex = 1.5, col = ifelse(type == "T1", "blue", "red"), pch = 16))
 legend("topleft", cex = 1.5, legend = paste0("T", 1:2),
 text.col = c("blue", "red"))
 ```
-
-```{r diaplasma_plot_fig, echo = FALSE}
-with(sampleMetadata,
-plot(age, bmi, cex = 1.5, col = ifelse(type == "T1", "blue", "red"), pch = 16))
-legend("topleft", cex = 1.5, legend = paste0("T", 1:2),
-text.col = c("blue", "red"))
-```
-
 **Figure 1:** *age*, *body mass index (bmi)*, and diabetic *type* of the
 patients from the *diaplasma* cohort.
 
@@ -186,23 +178,15 @@ dataMatrix <- dataMatrix[, featureSelVl]
 variableMetadata <- variableMetadata[featureSelVl, ]
 ```
 
-```{r biosign_false, eval = FALSE}
+```{r biosign}
 set.seed(123)
 diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 set.seed(NULL)
 ```
-
-```{r biosign, echo = FALSE}
-set.seed(123)
-diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5,
-plotL = FALSE)
-plot(diaSign, file.pdfC = "figures/diasign.pdf")
-set.seed(NULL)
-```
-![**Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and *SVM*
+**Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and *SVM*
 classifiers extracted from the diaplasma dataset. The *S* tier corresponds to the
 final metabolite signature, i.e., metabolites which passed through all the
-selection steps.](figures/diasign.pdf)
+selection steps.
 
 The arguments are:
 
@@ -257,16 +241,12 @@ interest of comparing various machine learning approaches.
 The **individual boxplots** of the features from the *complete* signature can be
 visualized with:
 
-```{r boxplot_false, eval = FALSE}
+```{r boxplot}
 plot(diaSign, typeC = "boxplot")
 ```
-
-```{r boxplot, echo = FALSE}
-plot(diaSign, typeC = "boxplot", file.pdfC = "figures/diasign_box.pdf")
-```
-![**Figure 3:** Individual boxplots of the features selected for at least one of
+**Figure 3:** Individual boxplots of the features selected for at least one of
 the classification methods. Features selected for a single classifier are
-colored (*red* for PLS-DA, *green* for Random Forest and *blue* for SVM).](figures/diasign_box.pdf)
+colored (*red* for PLS-DA, *green* for Random Forest and *blue* for SVM).
 
 Let us see the metadata of the *complete* signature:
 
@@ -291,22 +271,13 @@ trainVi <- 1:floor(0.8 * nrow(dataMatrix))
 testVi <- setdiff(1:nrow(dataMatrix), trainVi)
 ```
 
-```{r biosign_train_false, eval = FALSE}
+```{r biosign_train, warning = FALSE}
 set.seed(123)
 diaTrain <- biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
 bootI = 5)
 set.seed(NULL)
 ```
-
-```{r biosign_train, echo = FALSE, message = FALSE, warning = FALSE}
-set.seed(123)
-diaTrain <- biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
-bootI = 5, plotL = FALSE)
-set.seed(NULL)
-plot(diaTrain, file.pdfC = "figures/diatrain.pdf")
-```
-
-![**Figure 4:** Signatures from the training data set](figures/diatrain.pdf)
+**Figure 4:** Signatures from the training data set.
 
 We extract the **fitted** types on the training dataset restricted to the *S*
 signatures:
@@ -369,21 +340,12 @@ the phenoData column to be used as the response.
 In the example below, we will first build a minimal *ExpressionSet* object from
 the *diaplasma* data set, and we subsequently perform signature discovery:
 
-```{r expressionset_code, eval = FALSE}
+```{r expressionset_code, eval = FALSE, message = FALSE, warning = FALSE}
 library(Biobase)
 diaSet <- ExpressionSet(assayData = t(dataMatrix),
 phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
 set.seed(123)
 biosign(diaSet, "type", bootI = 5)
-set.seed(NULL)
-```
-
-```{r expressionset_figure, echo = FALSE, message = FALSE, warning = FALSE}
-library(Biobase)
-diaSet <- ExpressionSet(assayData = t(dataMatrix),
-phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
-set.seed(123)
-diaSet.bsg <- biosign(diaSet, "type", bootI = 5, plotL = FALSE)
 set.seed(NULL)
 ```
 
@@ -419,7 +381,7 @@ for further details and examples).
 
 We can for instance look for signatures of the *gender*:
 
-```{r sacurine_false, eval = FALSE}
+```{r sacurine}
 data(sacurine)
 set.seed(123) ##
 sacSign <- biosign(sacurine[["dataMatrix"]],
@@ -427,18 +389,7 @@ sacurine[["sampleMetadata"]][, "gender"],
 methodVc = "plsda")
 set.seed(NULL)
 ```
-
-```{r sacurine, echo = FALSE}
-data(sacurine)
-set.seed(123) ##
-sacSign <- biosign(sacurine[["dataMatrix"]],
-sacurine[["sampleMetadata"]][, "gender"],
-methodVc = "plsda", plotL = FALSE)
-set.seed(NULL)
-plot(sacSign, file.pdfC = "figures/sacsign.pdf")
-```
-
-![**Figure 5:** PLS-DA signature from the 'sacurine' data set.](figures/sacsign.pdf)
+**Figure 5:** PLS-DA signature from the 'sacurine' data set.
 
 ## Apples spikes with known compounds (metabolomics)
 
@@ -469,16 +420,9 @@ for multivariate analysis, that:
 
 1. no clear separation can be observed by PCA:
 
-```{r biomark_pca_false, eval = FALSE}
+```{r biomark_pca}
 biomark.pca <- opls(appleMN, plotL = FALSE)
 plot(biomark.pca, parAsColFcVn = spikeFc)
-```
-
-```{r biomark_pca, echo = FALSE}
-biomark.pca <- opls(appleMN, plotL = FALSE)
-layout(matrix(1:4, nrow = 2, byrow = TRUE))
-for(typeC in c("overview", "outlier", "x-score", "x-loading"))
-plot(biomark.pca, typeVc = typeC, parAsColFcVn = spikeFc, parDevNewL = FALSE)
 ```
 
 2. PLS-DA modeling with the full dataset is not significant (as seen on
@@ -498,7 +442,7 @@ plot(biomark.pls, typeVc = typeC, parDevNewL = FALSE)
 
 Let us now extract the molecular signatures:
 
-```{r apple_biosign, eval = FALSE}
+```{r apple_biosign, warning = FALSE}
 set.seed(123)
 appleSign <- biosign(appleMN, spikeFc)
 set.seed(NULL)
@@ -508,7 +452,7 @@ The *449.1/327* corresponds to the Cyanidin-3-galactoside (absent in the
 control) and the *475.1/434.7* is probably a potassium adduct of the Phloridzin
 (80% concentration increase in group1; @Franceschi2012).
 
-```{r annotation, eval = FALSE}
+```{r annotation}
 annotDF <- SpikePos[["annotation"]]
 rownames(annotDF) <- colnames(appleMN)
 annotDF[getSignatureLs(appleSign)[["complete"]], c("adduct", "found.in.standards")]
@@ -524,7 +468,7 @@ chips resulting in expression data of 7,129 gene probes [@Golub1999]. The
 package from Bioconductor. Let us compute for example the SVM signature (to
 speed up this demo example, the number of features is restricted to 500):
 
-```{r golub_false, eval = FALSE}
+```{r golub_false, warning = FALSE, message = FALSE}
 library(golubEsets)
 data(Golub_Merge)
 golubMN <- t(exprs(Golub_Merge))
@@ -535,22 +479,7 @@ set.seed(123)
 golubSign <- biosign(golubMN[, varSubVi], leukemiaFc, methodVc = "svm")
 set.seed(NULL)
 ```
-
-```{r golub, echo = FALSE, warning = FALSE, message = FALSE}
-library(golubEsets)
-data(Golub_Merge)
-golubMN <- t(exprs(Golub_Merge))
-leukemiaFc <- pData(Golub_Merge)[["ALL.AML"]]
-table(leukemiaFc)
-varSubVi <- 1501:2000
-set.seed(123)
-golubSign <- biosign(golubMN[, varSubVi], leukemiaFc, methodVc = "svm",
-plotL = FALSE)
-set.seed(NULL)
-plot(golubSign, file.pdfC = "figures/golsign.pdf")
-```
-
-![**Figure 6:** SVM signature from the *golub* data set.](figures/golsign.pdf)
+**Figure 6:** SVM signature from the *golub* data set.
 
 The computation results in a signature of 2 features only and a sparse SVM model
 performing almost as well (94.4% accuracy) as the model trained on the dataset

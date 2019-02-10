@@ -1,10 +1,23 @@
+CHANGES IN VERSION 1.11.8
+------------------------------
+
+MINOR MODIFICATION
+
+    o vignette minor modification
+
+CHANGES IN VERSION 1.11.6
+------------------------------
+
+MINOR MODIFICATION
+
+    o dev.new() is no more called by the plot method
+
 CHANGES IN VERSION 1.11.4
 ------------------------------
 
 BUG FIXED
 
     o error message when y is a character but not a factor is now fixed
-
 
 CHANGES IN VERSION 1.11.2
 ------------------------------

@@ -534,11 +534,8 @@ setMethod("plot", signature(x = "biosign"),
                    })
             
             
-            if(is.null(file.pdfC)) {
-              dev.new()
-            } else {
+            if(!is.null(file.pdfC))
               pdf(file.pdfC)
-            }
             
             switch(typeC,
                    
