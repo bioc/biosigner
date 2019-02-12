@@ -107,7 +107,7 @@ diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix),
                                                       title = "diaplasma"))
                                                       
 diaSign <- biosign(diaSet, "type", bootI = 5)
-diaSet <- getEset(sacPlsda)
+diaSet <- getEset(diaSign)
 head(Biobase::pData(diaSet))
 head(Biobase::fData(diaSet))
 

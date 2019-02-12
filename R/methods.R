@@ -120,8 +120,7 @@ setMethod("biosign", signature(x = "data.frame"),
 #'
 #'#' #### Application to an ExpressionSet
 #' 
-#' exprs <- t(dataMatrix)
-#' diaSet <- Biobase::ExpressionSet(assayData = exprs, 
+#' diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix), 
 #'                                  phenoData = new("AnnotatedDataFrame", 
 #'                                                  data = sampleMetadata), 
 #'                                  featureData = new("AnnotatedDataFrame", 
