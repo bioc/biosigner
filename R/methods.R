@@ -129,7 +129,7 @@ setMethod("biosign", signature(x = "data.frame"),
 #'                                                       title = "diaplasma"))
 #'                                                       
 #' diaSign <- biosign(diaSet, "type", bootI = 5)
-#' diaSet <- getEset(sacPlsda)
+#' diaSet <- getEset(diaSign)
 #' head(Biobase::pData(diaSet))
 #' head(Biobase::fData(diaSet))
 #' 
