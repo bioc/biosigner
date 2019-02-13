@@ -3,30 +3,39 @@
 setMethod("biosign", signature(x = "ExpressionSet"),
           function(x, y, ...) {
             
-            if(!(y %in% colnames(Biobase::pData(x)))) {
+            if(!(y %in% colnames(pData(x)))) {
               stop("'y' must be the name of a column of the phenoData slot of the 'ExpressionSet' object", call. = FALSE)
             } else {
-              rspFcVc <- Biobase::pData(x)[, y]
-              bsg <- biosign(t(Biobase::exprs(x)), rspFcVc, ...)
+              rspFcVc <- pData(x)[, y]
+              bsg <- biosign(t(exprs(x)), rspFcVc, ...)
             }
             
             tierMC <- bsg@tierMC
             
+            fdaDF <- fData(x)
+            
             if(!is.null(tierMC)) {
               
-              colnames(tierMC) <- paste(y,
-                                        "biosign",
-                                        gsub("randomforest", "forest", colnames(tierMC)),
-                                        sep = "_")
+              for(colI in 1:ncol(tierMC)) {
+                
+                tierVc <- ropls:::.genVec(x, "feature", "character")
+                
+                tierVc[rownames(tierMC)] <- tierMC[, colI]
+                
+                fdaDF[, paste(y,
+                              "biosign",
+                              gsub("randomforest", "forest", colnames(tierMC)[colI]),
+                              sep = "_")] <- tierVc
               
-              Biobase::fData(x) <- Biobase::combine(Biobase::fData(x), as.data.frame(tierMC[Biobase::featureNames(x), ],
-                                                                                     stringsAsFactors = FALSE))
+              }
               
             }
             
+            fData(x) <- fdaDF
+            
             bsg@eset <- x
             
-            return(invisible(bsg))
+            bsg
             
           })
 
@@ -120,18 +129,17 @@ setMethod("biosign", signature(x = "data.frame"),
 #'
 #'#' #### Application to an ExpressionSet
 #' 
-#' diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix), 
-#'                                  phenoData = new("AnnotatedDataFrame", 
-#'                                                  data = sampleMetadata), 
-#'                                  featureData = new("AnnotatedDataFrame", 
-#'                                                    data = variableMetadata),
-#'                                  experimentData = new("MIAME", 
-#'                                                       title = "diaplasma"))
-#'                                                       
-#' diaSign <- biosign(diaSet, "type", bootI = 5)
+#' diaSet <- ExpressionSet(assayData = t(dataMatrix), 
+#'                         phenoData = new("AnnotatedDataFrame", 
+#'                                         data = sampleMetadata), 
+#'                         featureData = new("AnnotatedDataFrame", 
+#'                                           data = variableMetadata),
+#'                         experimentData = new("MIAME", 
+#'                                              title = "diaplasma"))
+#' set.seed(123)
+#' diaSign <- biosign(diaSet, "type", bootI = 5, plotL = FALSE)
 #' diaSet <- getEset(diaSign)
-#' head(Biobase::pData(diaSet))
-#' head(Biobase::fData(diaSet))
+#' head(fData(diaSet))
 #' 
 #' detach(diaplasma)
 #'

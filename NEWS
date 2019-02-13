@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.11.16
+------------------------------
+
+MINOR MODIFICATION
+
+    o minor internal modification for the handling of ExpressionSet instances
+
 CHANGES IN VERSION 1.11.14
 ------------------------------
 

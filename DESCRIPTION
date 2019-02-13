@@ -18,12 +18,13 @@ Description: Feature selection is critical in omics data analysis to extract
     models are returned, enabling future predictions on new datasets. A Galaxy
     implementation of the package is available within the Workflow4metabolomics.org
     online infrastructure for computational metabolomics.
+Depends:
+    ropls
 Imports:
     Biobase,
     methods,
     e1071,
-    randomForest,
-    ropls
+    randomForest
 Suggests:
     BioMark,
     BiocGenerics,

@@ -2,5 +2,5 @@
 .Rhistory
 .RData
 .Ruserdata
-/tests/testthat/*.pdf
-/vignettes/figures/
+tests/testthat/*.pdf
+vignettes/figures/
