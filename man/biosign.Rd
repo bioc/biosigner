@@ -98,18 +98,17 @@ diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 
 #' #### Application to an ExpressionSet
 
-diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix), 
-                                 phenoData = new("AnnotatedDataFrame", 
-                                                 data = sampleMetadata), 
-                                 featureData = new("AnnotatedDataFrame", 
-                                                   data = variableMetadata),
-                                 experimentData = new("MIAME", 
-                                                      title = "diaplasma"))
-                                                      
-diaSign <- biosign(diaSet, "type", bootI = 5)
+diaSet <- ExpressionSet(assayData = t(dataMatrix), 
+                        phenoData = new("AnnotatedDataFrame", 
+                                        data = sampleMetadata), 
+                        featureData = new("AnnotatedDataFrame", 
+                                          data = variableMetadata),
+                        experimentData = new("MIAME", 
+                                             title = "diaplasma"))
+set.seed(123)
+diaSign <- biosign(diaSet, "type", bootI = 5, plotL = FALSE)
 diaSet <- getEset(diaSign)
-head(Biobase::pData(diaSet))
-head(Biobase::fData(diaSet))
+head(fData(diaSet))
 
 detach(diaplasma)
 
