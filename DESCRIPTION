@@ -1,8 +1,8 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.11.20
-Date: 2019-02-14
+Version: 1.11.22
+Date: 2019-02-16
 Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
     <etienne.thevenot@cea.fr>
 Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
@@ -19,9 +19,9 @@ Description: Feature selection is critical in omics data analysis to extract
     implementation of the package is available within the Workflow4metabolomics.org
     online infrastructure for computational metabolomics.
 Depends:
+    Biobase,
     ropls
 Imports:
-    Biobase,
     methods,
     e1071,
     randomForest

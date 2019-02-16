@@ -1106,7 +1106,7 @@ setMethod("show",
 #' head(Biobase::pData(diaSet))
 #' head(Biobase::fData(diaSet))
 #' 
-#' detach(sacurine)
+#' detach(diaplasma)
 #'
 #' @rdname getEset
 #' @export

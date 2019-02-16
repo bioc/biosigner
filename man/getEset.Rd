@@ -55,7 +55,7 @@ diaSet <- biosigner::getEset(diaSign)
 head(Biobase::pData(diaSet))
 head(Biobase::fData(diaSet))
 
-detach(sacurine)
+detach(diaplasma)
 
 }
 \author{
