@@ -569,7 +569,7 @@ getBootSignificanceF <- function(dataLs = NULL,
     switch(methC,
            "plsda" = {
                methC = "opls"
-               methArgLs = list(permI = 0, printL = FALSE, plotL = FALSE)
+               methArgLs = list(permI = 0, fig.pdfC = NULL, info.txtC = NULL)
                methNamLs = list(x="x", y="y")
                predNamLs = list(object="object", newdata="newdata")
                predArgLs= NULL

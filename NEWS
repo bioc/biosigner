@@ -1,3 +1,17 @@
+CHANGES IN VERSION 1.11.26
+------------------------------
+
+NEW FEATURE
+
+    o biosign and plot methods: 'fig.pdfC' and 'info.txtC' arguments have been added for compatibility reasons with other packages; they have the same role as 'file.pdfC' and '.sinkC' which now generate a deprecated warning. 
+
+CHANGES IN VERSION 1.11.24
+------------------------------
+
+MINOR MODIFICATION
+
+    o minor internal modification
+
 CHANGES IN VERSION 1.11.22
 ------------------------------
 

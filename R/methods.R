@@ -3,20 +3,20 @@
 setMethod("biosign", signature(x = "ExpressionSet"),
           function(x, y, ...) {
             
-            if(!(y %in% colnames(pData(x)))) {
+            if (!(y %in% colnames(pData(x)))) {
               stop("'y' must be the name of a column of the phenoData slot of the 'ExpressionSet' object", call. = FALSE)
             } else {
               rspFcVc <- pData(x)[, y]
-              bsg <- biosign(t(exprs(x)), rspFcVc, ...)
+              bsg <- biosign(t(Biobase::exprs(x)), rspFcVc, ...)
             }
             
             tierMC <- bsg@tierMC
             
-            fdaDF <- fData(x)
+            fdaDF <- Biobase::fData(x)
             
-            if(!is.null(tierMC)) {
+            if (!is.null(tierMC)) {
               
-              for(colI in 1:ncol(tierMC)) {
+              for (colI in 1:ncol(tierMC)) {
                 
                 tierVc <- ropls:::.genVec(x, "feature", "character")
                 
@@ -31,25 +31,26 @@ setMethod("biosign", signature(x = "ExpressionSet"),
               
             }
             
-            fData(x) <- fdaDF
+            Biobase::fData(x) <- fdaDF
             
             bsg@eset <- x
             
-            bsg
+            return(invisible(bsg))
             
           })
 
 #' @rdname biosign
 #' @export
 setMethod("biosign", signature(x = "data.frame"),
-          function(x, ...) {
-            if(!all(sapply(x, data.class) == "numeric")) {
+          function(x, y, ...) {
+            if (!all(sapply(x, data.class) == "numeric")) {
               stop("'x' data frame must contain columns of 'numeric' vectors only", call. = FALSE)
             } else
               x <- as.matrix(x)
-            bsg <- biosign(x, ...)
+            bsg <- biosign(x, y, ...)
             
             return(invisible(bsg))
+            
           })
 
 ####    biosign    ####
@@ -83,13 +84,15 @@ setMethod("biosign", signature(x = "data.frame"),
 #' @param fixRankL Logical: Should the initial ranking be computed with the
 #' full model only, or as the median of the ranks from the models built on the
 #' sampled dataset?
-#' @param printL Logical: Should informations regarding the data set and the
-#' model be printed? [default = TRUE]
-#' @param plotL Logical: Should the 'summary' plot be displayed? [default =
-#' TRUE]
+#' @param printL Logical: deprecated: use the 'info.txtC' argument instead
+#' @param plotL Logical: deprecated: use the 'fig.pdfC' argument instead
 #' @param .sinkC Character: Name of the file for R output diversion [default =
 #' NULL: no diversion]; Diversion of messages is required for the integration
 #' into Galaxy
+#' @param fig.pdfC Character: Figure filename ending with '.pdf'; default is NA
+#' (no saving; displaying instead); set to 'NULL' to prevent plotting
+#' @param info.txtC Character: Report filename for R output diversion [default =
+#' NA: no diversion]; set to 'NULL' to disable any verbose
 #' @param ... Currently not used.
 #' @return An S4 object of class 'biosign' containing the following slots: 1)
 #' 'methodVc' character vector: selected classifier(s) ('plsda',
@@ -137,7 +140,7 @@ setMethod("biosign", signature(x = "data.frame"),
 #'                         experimentData = new("MIAME", 
 #'                                              title = "diaplasma"))
 #' set.seed(123)
-#' diaSign <- biosign(diaSet, "type", bootI = 5, plotL = FALSE)
+#' diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = NULL)
 #' diaSet <- getEset(diaSign)
 #' head(fData(diaSet))
 #' 
@@ -159,19 +162,42 @@ setMethod("biosign", signature(x = "matrix"),
                    plotL = TRUE,
                    
                    .sinkC = NULL,
+                   
+                   fig.pdfC = NA,                   
+                   info.txtC = NA,                   
+                   
                    ...) {
             
-            if(!is.null(.sinkC)) ##  Diversion of messages is required for the integration into Galaxy
-              sink(.sinkC, append = TRUE)
+            if (!printL) {
+              warning("'printL' argument is deprecated; use 'info.txtC' instead",
+                      call. = FALSE)
+              info.txtC <- NULL
+            }
             
-            if(mode(x) != "numeric")
+            if (!plotL) {
+              warning("'plotL' argument is deprecated; use 'fig.pdfC' instead",
+                      call. = FALSE)
+              fig.pdfC <- NULL
+            }
+            
+            if (!is.null(.sinkC)) {
+              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead",
+                      call. = FALSE)
+              info.txtC <- .sinkC
+            }
+            
+            
+            if (!is.null(info.txtC) && !is.na(info.txtC)) ##  Diversion of messages is required for the integration into Galaxy
+              sink(info.txtC, append = TRUE)
+            
+            if (mode(x) != "numeric")
               stop("'x' matrix must be of 'numeric' mode", call. = FALSE)
             xMN <- x
             
-            if(any(apply(xMN, 2, function(colVn) all(is.na(colVn)))))
+            if (any(apply(xMN, 2, function(colVn) all(is.na(colVn)))))
               stop("'x' contains columns with 'NA' only", call. = FALSE)
             
-            if(is.null(colnames(xMN))) {
+            if (is.null(colnames(xMN))) {
               colnames(xMN) <- paste0("V", 1:ncol(xMN))
               warning(paste0("Missing column names in 'x' (i.e., variable names): Names are being set to '",
                              head(colnames(xMN), 1),
@@ -181,36 +207,36 @@ setMethod("biosign", signature(x = "matrix"),
                       call. = FALSE)
             }
             
-            if(is.character(y)) {
+            if (is.character(y)) {
               y <- factor(y)
               warning("'y' character vector converted to a factor with levels '",
                       paste(levels(y), collapse = "', '"),
                       "'",
                       call. = FALSE)
-            } else if(!is.factor(y)) {
+            } else if (!is.factor(y)) {
               stop("'y' must be a character vector or a factor", call. = FALSE)
             }
             
 
-            if(length(y) != nrow(xMN)) {
+            if (length(y) != nrow(xMN)) {
               stop("'y' factor length must be equal to the number of rows of 'x'", call. = FALSE)
-            } else if(length(levels(y)) != 2) {
+            } else if (length(levels(y)) != 2) {
               stop("'y' must have two levels", call. = FALSE)
-            } else if(any(is.na(y))) {
+            } else if (any(is.na(y))) {
               stop("'y' must not contain missing ('NA') values")
             } else
               yFc <- y
             
             methodAllVc <- c("plsda", "randomforest", "svm")
-            if(length(methodVc) == 1 && methodVc == "all") {
+            if (length(methodVc) == 1 && methodVc == "all") {
               methodVc <- methodAllVc
-            } else if(!all(methodVc %in% methodAllVc))
+            } else if (!all(methodVc %in% methodAllVc))
               stop("The following method(s) is/are not available: '",
                    paste(methodVc[!(methodVc %in% methodAllVc)], collapse = "', '"),
                    "'",
                    call. = FALSE)
             
-            if(pvalN < 0 || pvalN > 1)
+            if (pvalN < 0 || pvalN > 1)
               stop("The p-value threshold 'pvalN' (",
                    pvalN,
                    ") must be between 0 and 1",
@@ -232,7 +258,7 @@ setMethod("biosign", signature(x = "matrix"),
             stopIterVl <- logical(length(methodVc))
             names(stopIterVl) <- names(accuVn) <- methodVc
             
-            for(methodC in methodVc) {
+            for (methodC in methodVc) {
               
               tierMetLs <- getTierF(datasetLs = datasetLs,
                                     methodC = methodC,
@@ -259,37 +285,37 @@ setMethod("biosign", signature(x = "matrix"),
             modelLs <- vector(mode = "list", length = length(methodVc))
             names(modelLs) <- methodVc
             signatureLs <- modelLsAS <- modelLs ## void models are empty lists
-            for(sgnI in 1:length(signatureLs))
+            for (sgnI in 1:length(signatureLs))
               signatureLs[[sgnI]] <- character() ## void signatures are character(0)
             signatureLsAS <- signatureLs
             
             ## translating tiers (building tierMC)
             
-            if(max(tierMN) > 0) {
-              for(methodC in methodVc) {
+            if (max(tierMN) > 0) {
+              for (methodC in methodVc) {
                 tierVn <- tierMN[, methodC]
                 translate <- rep("E", length(unique(tierVn)))
-                if(max(tierVn) > 0){
-                  ## if(stop.rec[[methodC]]){
-                  if(stopIterVl[methodC]){
-                    translate[max(tierVn)+1] <- "S"
-                    if(max(tierVn) > 1)
+                if (max(tierVn) > 0) {
+                  ## if(stop.rec[[methodC]]) {
+                  if (stopIterVl[methodC]) {
+                    translate[max(tierVn) + 1] <- "S"
+                    if (max(tierVn) > 1)
                       translate[max(tierVn)] <- "A"
-                    if(max(tierVn) > 2)
-                      translate[max(tierVn)-1] <- "B"
-                    if(max(tierVn) > 3)
-                      translate[max(tierVn)-2] <- "C"
-                    if(max(tierVn) > 4)
-                      translate[max(tierVn)-3] <- "D"
+                    if (max(tierVn) > 2)
+                      translate[max(tierVn) - 1] <- "B"
+                    if (max(tierVn) > 3)
+                      translate[max(tierVn) - 2] <- "C"
+                    if (max(tierVn) > 4)
+                      translate[max(tierVn) - 3] <- "D"
                   }
                   else{
-                    translate[max(tierVn)+1] <- "A"
-                    if(max(tierVn) > 1)
+                    translate[max(tierVn) + 1] <- "A"
+                    if (max(tierVn) > 1)
                       translate[max(tierVn)] <- "B"
-                    if(max(tierVn) > 2)
-                      translate[max(tierVn)-1] <- "C"
-                    if(max(tierVn) > 3)
-                      translate[max(tierVn)-2] <- "D"
+                    if (max(tierVn) > 2)
+                      translate[max(tierVn) - 1] <- "C"
+                    if (max(tierVn) > 3)
+                      translate[max(tierVn) - 2] <- "D"
                   }
                 }
                 tierVn <- translate[tierVn + 1]
@@ -303,13 +329,13 @@ setMethod("biosign", signature(x = "matrix"),
               tierFullVn <- length(tierFullVc):1
               names(tierFullVn) <- tierFullVc
               tierOrdMC <- NULL
-              for(tierC in tierFullVc) {
-                if(any(tierC %in% c(tierMC))) {
+              for (tierC in tierFullVc) {
+                if (any(tierC %in% c(tierMC))) {
                   
                   rowSelVl <- rowSums(tierMC == tierC) > 0
                   tierMaxMC <- tierMC[rowSelVl, , drop = FALSE]
                   tierMaxMN <- tierMaxMC
-                  for(j in 1:ncol(tierMaxMC))
+                  for (j in 1:ncol(tierMaxMC))
                     tierMaxMN[, j] <- tierFullVn[tierMaxMC[, j]]
                   mode(tierMaxMN) <- "numeric"
                   tierMaxMC <- tierMaxMC[order(rowSums(tierMaxMN), decreasing = TRUE), , drop = FALSE]
@@ -323,7 +349,7 @@ setMethod("biosign", signature(x = "matrix"),
               
               ## Accuracy of full, S+A and S models
               
-              for(methodC in methodVc) {
+              for (methodC in methodVc) {
                 ## accuracyMN["Full", methodC] <- fsiResLs[[methodC]]$accuracyN
                 accuracyMN["Full", methodC] <- accuVn[methodC]
                 
@@ -332,7 +358,7 @@ setMethod("biosign", signature(x = "matrix"),
                 
                 signatureLsAS[[methodC]] <- rownames(tierMC)[which(tierMC[, methodC] %in% c("S","A"))]
                 
-                if(length(signatureLsAS[[methodC]])) {
+                if (length(signatureLsAS[[methodC]])) {
                   datasetMethodLs$variableMetadata <- datasetMethodLs$variableMetadata[signatureLsAS[[methodC]], , drop = FALSE]
                   datasetMethodLs$dataMatrix  <- datasetMethodLs$dataMatrix[ , signatureLsAS[[methodC]], drop = FALSE]
                   my.fsi <- getBootSignificanceF(datasetMethodLs,
@@ -350,7 +376,7 @@ setMethod("biosign", signature(x = "matrix"),
                 
                 signatureLs[[methodC]] <- rownames(tierMC)[which(tierMC[, methodC] == "S")]
                 
-                if(length(signatureLs[[methodC]])) {
+                if (length(signatureLs[[methodC]])) {
                   datasetMethodLs$variableMetadata <- datasetMethodLs$variableMetadata[signatureLs[[methodC]], , drop = FALSE]
                   datasetMethodLs$dataMatrix  <- datasetMethodLs$dataMatrix[ , signatureLs[[methodC]], drop = FALSE]
                   my.fsi <- getBootSignificanceF(datasetMethodLs,
@@ -375,7 +401,7 @@ setMethod("biosign", signature(x = "matrix"),
               
               ## Accuracy of full model
               
-              for(methodC in methodVc) {
+              for (methodC in methodVc) {
                 
                 accuracyMN["Full", methodC] <- accuVn[methodC]
                 
@@ -403,20 +429,19 @@ setMethod("biosign", signature(x = "matrix"),
             
             ## Printing
             
-            if(printL) {
+            if (!is.null(info.txtC)) {
               show(bsg)
               warnings()
             }
             
             ## Plotting
             
-            ## if(!is.null(bsg@accuracyMN) && plotL)
-            if(!all(is.na(bsg@accuracyMN["S", ])) && plotL)
-              plot(bsg)
+            if (!all(is.na(bsg@accuracyMN["S", ])) && !is.null(fig.pdfC))
+              plot(bsg, typeC = "tier", fig.pdfC = fig.pdfC)
             
             ## Closing connection
             
-            if(!is.null(.sinkC)) ## Used in the Galaxy module
+            if (!is.null(info.txtC) && !is.na(info.txtC)) ## Used in the Galaxy module
               sink()
             
             ## Returning
@@ -443,11 +468,12 @@ setMethod("biosign", signature(x = "matrix"),
 #' @param typeC Character: Plot type; either 'tier' [default] displaying the
 #' comparison of signatures up to the selected 'tierMaxC' or 'boxplot' showing
 #' the individual boxplots of the features selected by all the classifiers
-#' @param file.pdfC Character: Figure filename ending with '.pdf'; default is
-#' NULL (no saving; displaying instead)
-#' @param .sinkC Character: Name of the file for R output diversion [default =
-#' NULL: no diversion]; Diversion of messages is required for the integration
-#' into Galaxy
+#' @param file.pdfC Character: deprecated; use the 'fig.pdfC' argument instead
+#' @param .sinkC Character: deprecated; use the 'info.txtC' argument instead
+#' @param fig.pdfC Figure filename (e.g. in case of batch mode) ending with
+#' '.pdf'; default is NA (no saving; displaying instead)
+#' @param info.txtC Character: Report filename for R output diversion [default =
+#' NA: no diversion]
 #' @param ... Currently not used.
 #' @return A plot is created on the current graphics device.
 #' @author Philippe Rinaudo and Etienne Thevenot (CEA)
@@ -486,23 +512,41 @@ setMethod("plot", signature(x = "biosign"),
                    typeC = c("tier", "boxplot")[1],
                    file.pdfC = NULL,
                    .sinkC = NULL,
+                   
+                   fig.pdfC = NA,
+                   info.txtC = NA,
+                   
                    ...) {
             
-            if(!is.null(.sinkC)) ##  Diversion of messages is required for the integration into Galaxy
-              sink(.sinkC, append = TRUE)
+            if (!is.null(file.pdfC)) {
+              warning("'file.pdfC' argument is deprecated; use 'fig.pdfC' instead",
+                      call. = FALSE)
+              fig.pdfC <- file.pdfC
+            }
+            
+            if (!is.null(.sinkC)) {
+              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead",
+                      call. = FALSE)
+              info.txtC <- .sinkC
+            }
+            
+            if (is.null(fig.pdfC))
+              stop("'fig.pdfC' cannot be set to NULL in the 'plot' method.",
+                   call. = FALSE)
+            
+            if (!is.null(info.txtC) && !is.na(info.txtC)) ##  Diversion of messages is required for the integration into Galaxy
+              sink(info.txtC, append = TRUE)
             
             tierFullVc <- c("S", LETTERS[1:5])
             
-            if(length(tierMaxC) != 1 || any(!(tierMaxC %in% tierFullVc))) {
-              message("'tierMaxC' argument must be either '", paste(tierFullVc, collapse = "', '"), "' for the 'tier' plot")
-              if(!is.null(.sinkC)) ## Used in the Galaxy module
-                sink()
-              return(invisible(NULL))
-            } else if(typeC == "boxplot" && any(!(tierMaxC %in% c("S", "A")))) {
-              message("'tierMaxC' argument must be either 'S' or 'A' for the 'boxplot'")
-              if(!is.null(.sinkC)) ## Used in the Galaxy module
-                sink()
-              return(invisible(NULL))
+            if (length(tierMaxC) != 1 || any(!(tierMaxC %in% tierFullVc))) {
+              stop("'tierMaxC' argument must be either '",
+                   paste(tierFullVc, collapse = "', '"),
+                   "' for the 'tier' plot",
+                   call. = FALSE)
+            } else if (typeC == "boxplot" && any(!(tierMaxC %in% c("S", "A")))) {
+              stop("'tierMaxC' argument must be either 'S' or 'A' for the 'boxplot'",
+                   call. = FALSE)
             } else
               tierVc <- tierFullVc[1:which(tierFullVc == tierMaxC)]
             
@@ -510,12 +554,12 @@ setMethod("plot", signature(x = "biosign"),
                    
                    tier = {
                      
-                     if(sum(x@tierMC %in% tierVc) == 0) {
+                     if (sum(x@tierMC %in% tierVc) == 0) {
                        
-                       message("No signature up to tier '", tierMaxC, "' to be plotted")
-                       if(!is.null(.sinkC)) ## Used in the Galaxy module
-                         sink()
-                       return(invisible(NULL))
+                       stop("No signature up to tier '",
+                            tierMaxC,
+                            "' to be plotted",
+                            call. = FALSE)
                        
                      }
                      
@@ -532,33 +576,37 @@ setMethod("plot", signature(x = "biosign"),
                               xSubMN <- x@AS[["xSubMN"]]
                             })
                      
-                     if(length(sgnAllVc) == 0) {
-                       message("No signature up to tier '", tail(tierVc, 1), "' to be plotted")
-                       if(!is.null(.sinkC)) ## Used in the Galaxy module
-                         sink()
-                       return(invisible(NULL))
+                     if (length(sgnAllVc) == 0) {
+                       stop("No signature up to tier '",
+                            tail(tierVc, 1), "' to be plotted",
+                            call. = FALSE)
                      }
                      
                    })
             
             
-            if(!is.null(file.pdfC))
-              pdf(file.pdfC)
+            if (!is.na(fig.pdfC))
+              pdf(fig.pdfC)
+            
+            opar <- par(no.readonly = TRUE)
             
             switch(typeC,
                    
                    tier = {
                      
-                     if(length(setdiff(tierVc, c(x@tierMC)))) {
+                     if (length(setdiff(tierVc, c(x@tierMC)))) {
                        tierNotFoundVc <- tierFullVc[tierFullVc %in% setdiff(tierVc, c(x@tierMC))]
-                       warning("tierMC does not contain the following values: '", paste(tierNotFoundVc, collapse = "', '"), "'", call. = FALSE)
+                       warning("tierMC does not contain the following values: '",
+                               paste(tierNotFoundVc, collapse = "', '"), "'",
+                               call. = FALSE)
                      }
-                     inputMC <- x@tierMC[apply(x@tierMC, 1, function(rowVc) sum(rowVc %in% tierVc) > 0), ,
+                     inputMC <- x@tierMC[apply(x@tierMC, 1,
+                                               function(rowVc) sum(rowVc %in% tierVc) > 0), ,
                                          drop = FALSE]
                      tierFullVi <- 1:length(tierFullVc)
                      names(tierFullVi) <- tierFullVc
                      inputMN <- inputMC
-                     for(j in 1:ncol(inputMN))
+                     for (j in 1:ncol(inputMN))
                        inputMN[, j] <- tierFullVi[inputMC[, j]]
                      mode(inputMN) <- "numeric"
                      
@@ -569,7 +617,7 @@ setMethod("plot", signature(x = "biosign"),
                                                gsub("randomforest", "Random Forest",
                                                     gsub("svm", "SVM", colnames(imageMN))))
                      
-                     if(length(rownames(imageMN)) == 0) {
+                     if (length(rownames(imageMN)) == 0) {
                        
                        rownameInVc <- rep("", times = nrow(imageMN))
                        
@@ -582,7 +630,7 @@ setMethod("plot", signature(x = "biosign"),
                        rownameInCharVsNumL <- NA %in% as.numeric(rownameInVc)
                        options(warn = warnOpN)
                        
-                       if(rownameInCharVsNumL) {
+                       if (rownameInCharVsNumL) {
                          
                          rownameInDuplicateVc <- duplicated(rownameInVc)
                          
@@ -697,7 +745,7 @@ setMethod("plot", signature(x = "biosign"),
                      par(cex = 1)
                      
                      
-                     if(rownameInCharVsNumL) {
+                     if (rownameInCharVsNumL) {
                        
                        yLabelVc <- rownameInVc[rownameInVc != ""]
                        
@@ -728,7 +776,7 @@ setMethod("plot", signature(x = "biosign"),
                        
                        indiceVn <- numeric()
                        
-                       for(k in 1:length(prettyVn))
+                       for (k in 1:length(prettyVn))
                          indiceVn[k] <- which(abs(rownameVn - prettyVn[k]) == min(abs(rownameVn - prettyVn[k])))[1]
                        
                        axis(side = 2,
@@ -742,11 +790,11 @@ setMethod("plot", signature(x = "biosign"),
                      
                      ## additional lines
                      
-                     if(rownameInCharVsNumL)
+                     if (rownameInCharVsNumL)
                        abline(h = ncol(imageMN) - which(rownameInVc != "") + 1 + 0.5,
                               lwd = 1)
                      
-                     ## if(colnameInCharVsNumL)
+                     ## if (colnameInCharVsNumL)
                      abline(v = which(colnameInVc != "") - 0.5,
                             lwd = 1)
                      
@@ -765,7 +813,7 @@ setMethod("plot", signature(x = "biosign"),
                             lwd = 2,
                             xpd = TRUE)
                      
-                     box(lwd=3)
+                     box(lwd = 3)
                      
                    },
                    boxplot = {
@@ -789,7 +837,7 @@ setMethod("plot", signature(x = "biosign"),
                      par(font = 2, font.axis = 2, font.lab = 2, las = 1,
                          mar = c(2.1, 2.6, 2.6, 1.1),
                          oma = c(0, 0, 2.1, 0))
-                     for(bmkC in sgnAllVc) {
+                     for (bmkC in sgnAllVc) {
                        bmkTirVc <- x@tierMC[bmkC, ]
                        names(bmkTirVc) <- colnames(x@tierMC)
                        bmkTirSigVl <- bmkTirVc %in% tierVc
@@ -810,14 +858,15 @@ setMethod("plot", signature(x = "biosign"),
                      
                    })
             
+            par(opar)
             
-            if(!is.null(file.pdfC))
+            if (!is.na(fig.pdfC))
               dev.off()
             
             
             ## Closing connection
             
-            if(!is.null(.sinkC)) ## Used in the Galaxy module
+            if (!is.null(info.txtC) && !is.na(info.txtC))
               sink()
             
           })

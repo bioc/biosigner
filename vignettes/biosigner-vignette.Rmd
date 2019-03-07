@@ -421,7 +421,7 @@ for multivariate analysis, that:
 1. no clear separation can be observed by PCA:
 
 ```{r biomark_pca}
-biomark.pca <- opls(appleMN, plotL = FALSE)
+biomark.pca <- ropls::opls(appleMN, fig.pdfC = NULL)
 plot(biomark.pca, parAsColFcVn = spikeFc)
 ```
 
@@ -429,15 +429,8 @@ plot(biomark.pca, parAsColFcVn = spikeFc)
 the top left plot: 7 out of 20 models trained after random permutations of the
 labels have Q2 values higher than the model trained with the true labels):
 
-```{r biomark_pls_false, eval = FALSE}
-biomark.pls <- opls(appleMN, spikeFc)
-```
-
-```{r biomark_pls, echo = FALSE}
-biomark.pls <- opls(appleMN, spikeFc, plotL = FALSE)
-layout(matrix(1:4, nrow = 2, byrow = TRUE))
-for(typeC in c("overview", "outlier", "x-score", "x-loading"))
-plot(biomark.pls, typeVc = typeC, parDevNewL = FALSE)
+```{r biomark_pls}
+biomark.pls <- ropls::opls(appleMN, spikeFc)
 ```
 
 Let us now extract the molecular signatures:

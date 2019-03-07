@@ -7,7 +7,8 @@
 \title{Plot method for 'biosign' signature objects}
 \usage{
 \S4method{plot}{biosign}(x, y, tierMaxC = "S", typeC = c("tier",
-  "boxplot")[1], file.pdfC = NULL, .sinkC = NULL, ...)
+  "boxplot")[1], file.pdfC = NULL, .sinkC = NULL, fig.pdfC = NA,
+  info.txtC = NA, ...)
 }
 \arguments{
 \item{x}{An S4 object of class \code{biosign}, created by the \code{biosign}
@@ -23,12 +24,15 @@ number of selections}
 comparison of signatures up to the selected 'tierMaxC' or 'boxplot' showing
 the individual boxplots of the features selected by all the classifiers}
 
-\item{file.pdfC}{Character: Figure filename ending with '.pdf'; default is
-NULL (no saving; displaying instead)}
+\item{file.pdfC}{Character: deprecated; use the 'fig.pdfC' argument instead}
 
-\item{.sinkC}{Character: Name of the file for R output diversion [default =
-NULL: no diversion]; Diversion of messages is required for the integration
-into Galaxy}
+\item{.sinkC}{Character: deprecated; use the 'info.txtC' argument instead}
+
+\item{fig.pdfC}{Figure filename (e.g. in case of batch mode) ending with
+'.pdf'; default is NA (no saving; displaying instead)}
+
+\item{info.txtC}{Character: Report filename for R output diversion [default =
+NA: no diversion]}
 
 \item{...}{Currently not used.}
 }

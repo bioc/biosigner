@@ -10,12 +10,12 @@
 \usage{
 \S4method{biosign}{ExpressionSet}(x, y, ...)
 
-\S4method{biosign}{data.frame}(x, ...)
+\S4method{biosign}{data.frame}(x, y, ...)
 
 \S4method{biosign}{matrix}(x, y, methodVc = c("all", "plsda",
   "randomforest", "svm")[1], bootI = 50, pvalN = 0.05, permI = 1,
   fixRankL = FALSE, printL = TRUE, plotL = TRUE, .sinkC = NULL,
-  ...)
+  fig.pdfC = NA, info.txtC = NA, ...)
 }
 \arguments{
 \item{x}{Numerical data frame or matrix (observations x variables), or
@@ -45,15 +45,19 @@ of each new variable included into the model (forward selection)}
 full model only, or as the median of the ranks from the models built on the
 sampled dataset?}
 
-\item{printL}{Logical: Should informations regarding the data set and the
-model be printed? [default = TRUE]}
+\item{printL}{Logical: deprecated: use the 'info.txtC' argument instead}
 
-\item{plotL}{Logical: Should the 'summary' plot be displayed? [default =
-TRUE]}
+\item{plotL}{Logical: deprecated: use the 'fig.pdfC' argument instead}
 
 \item{.sinkC}{Character: Name of the file for R output diversion [default =
 NULL: no diversion]; Diversion of messages is required for the integration
 into Galaxy}
+
+\item{fig.pdfC}{Character: Figure filename ending with '.pdf'; default is NA
+(no saving; displaying instead); set to 'NULL' to prevent plotting}
+
+\item{info.txtC}{Character: Report filename for R output diversion [default =
+NA: no diversion]; set to 'NULL' to disable any verbose}
 }
 \value{
 An S4 object of class 'biosign' containing the following slots: 1)
@@ -106,7 +110,7 @@ diaSet <- ExpressionSet(assayData = t(dataMatrix),
                         experimentData = new("MIAME", 
                                              title = "diaplasma"))
 set.seed(123)
-diaSign <- biosign(diaSet, "type", bootI = 5, plotL = FALSE)
+diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = NULL)
 diaSet <- getEset(diaSign)
 head(fData(diaSet))
 

@@ -14,16 +14,16 @@ test_that("biosign_plsda", {
                        diaplasma[["sampleMetadata"]][, "type"],
                        methodVc = "plsda",
                        bootI = 5,
-                       plotL = FALSE)
+                       fig.pdfC = NULL)
   
   set.seed(NULL)
   
-  # plot(biosignLs)
-  # plot(biosignLs, tierMaxC = "A")
-  # plot(biosignLs, typeC = "boxplot")
-  # plot(biosignLs, tierMaxC = "A", typeC = "boxplot")
+  plot(biosignLs, fig.pdfC = "test.pdf")
+  plot(biosignLs, tierMaxC = "A", fig.pdfC = "test.pdf")
+  plot(biosignLs, typeC = "boxplot", fig.pdfC = "test.pdf")
+  plot(biosignLs, tierMaxC = "A", typeC = "boxplot", fig.pdfC = "test.pdf")
   
-  if(.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
+  if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(biosignLs@tierMC["m427.215t07.9", "plsda"],
                                "A")
@@ -51,11 +51,11 @@ test_that("biosign_randomforest", {
                        diaplasma[["sampleMetadata"]][, "type"],
                        methodVc = "randomforest",
                        bootI = 5,
-                       plotL = FALSE)
+                       fig.pdfC = "test.pdf")
   
   set.seed(NULL)
   
-  if(.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
+  if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     
     testthat::expect_identical(biosignLs@tierMC["m427.215t07.9", "randomforest"],
@@ -82,11 +82,11 @@ test_that("biosign_svm", {
                        diaplasma[["sampleMetadata"]][, "type"],
                        methodVc = "svm",
                        bootI = 5,
-                       plotL = FALSE)
+                       fig.pdfC = "test.pdf")
   
   set.seed(NULL)
   
-  if(.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
+  if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(biosignLs@tierMC["m123.998t01.0", "svm"],
                                "A")
@@ -112,7 +112,7 @@ test_that("biosign_predict", {
   biosignLs <- biosign(diaplasma[["dataMatrix"]][trainVi, varSelVi],
                        diaplasma[["sampleMetadata"]][trainVi, "type"],
                        bootI = 1,
-                       plotL = FALSE)
+                       fig.pdfC = "test.pdf")
   
   set.seed(NULL)
   
@@ -120,7 +120,7 @@ test_that("biosign_predict", {
                     diaplasma[["dataMatrix"]][setdiff(1:samTotI, trainVi), varSelVi])
   predDIA043Vc <- as.character(unlist(predDF["DIA043", ]))
   
-  if(.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
+  if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(predDIA043Vc,
                                c("T2", "T1", "T2"))
@@ -139,7 +139,7 @@ test_that("biosign_diaplasma", {
   biosignLs <- biosign(diaplasma[["dataMatrix"]][, varSelVi],
                        diaplasma[["sampleMetadata"]][, "type"],
                        bootI = 5,
-                       plotL = FALSE)
+                       fig.pdfC = "test.pdf")
   
   set.seed(NULL)
   
@@ -148,7 +148,7 @@ test_that("biosign_diaplasma", {
                 svm = character(0),
                 complete = c("m427.215t07.9", "m189.040t01.2"))
   
-  if(.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
+  if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(getSignatureLs(biosignLs), sigLs)
     
@@ -178,7 +178,7 @@ test_that("biosign_sacurine", {
   biosignLs <- biosign(sacurine[["dataMatrix"]],
                        sacurine[["sampleMetadata"]][, "gender"],
                        bootI = 5,
-                       plotL = FALSE)
+                       fig.pdfC = "test.pdf")
   
   set.seed(NULL)
   
@@ -188,7 +188,7 @@ test_that("biosign_sacurine", {
                 svm = c("Oxoglutaric acid", "p-Anisic acid", "Testosterone glucuronide", "Acetylphenylalanine", "Malic acid", "Pantothenic acid", "Taurine", "N4-Acetylcytidine", "Monoethyl phthalate"),
                 complete = c("Oxoglutaric acid", "p-Anisic acid", "Testosterone glucuronide", "Acetylphenylalanine", "Malic acid", "Pantothenic acid", "Gluconic acid and/or isomers", "Taurine", "N4-Acetylcytidine", "alpha-N-Phenylacetyl-glutamine", "Citric acid", "Glucuronic acid and/or isomers", "Hippuric acid", "Monoethyl phthalate", "Phe-Tyr-Asp (and isomers)", "Threonic acid/Erythronic acid"))
   
-  if(.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
+  if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(getSignatureLs(biosignLs), sigLs)
     
@@ -226,7 +226,7 @@ test_that("ExpressionSet", {
   diaSet <- diaSet[featureSelVl, ]
   
   set.seed(123)
-  diaSign <- biosign(diaSet, "type", bootI = 5)
+  diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = "test.pdf")
   
   diaSet <- biosigner::getEset(diaSign)
   
