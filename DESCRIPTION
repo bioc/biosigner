@@ -1,7 +1,7 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.11.26
+Version: 1.12.0
 Date: 2019-03-07
 Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
     <etienne.thevenot@cea.fr>
