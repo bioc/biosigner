@@ -186,6 +186,29 @@ setMethod("biosign", signature(x = "matrix"),
               info.txtC <- .sinkC
             }
             
+            if (is.null(info.txtC)) {
+              warning("'info.txtC = NULL' argument value is deprecated; use 'info.txtC = 'none'' instead.",
+                      call. = FALSE)
+              info.txtC <- 'none'
+            }
+            
+            if (is.na(info.txtC)) {
+              warning("'info.txtC = NA' argument value is deprecated; use 'info.txtC = 'interactive'' instead.",
+                      call. = FALSE)
+              info.txtC <- 'interactive'
+            }
+            
+            if (is.null(fig.pdfC)) {
+              warning("'fig.pdfC = NULL' argument value is deprecated; use 'fig.pdfC = 'none'' instead.",
+                      call. = FALSE)
+              fig.pdfC <- 'none'
+            }
+            
+            if (is.na(fig.pdfC)) {
+              warning("'fig.pdfC = NA' argument value is deprecated; use 'fig.pdfC = 'interactive'' instead.",
+                      call. = FALSE)
+              fig.pdfC <- 'interactive'
+            }
             
             if (!(info.txtC %in% c("none", "interactive")))
               sink(info.txtC, append = TRUE)
@@ -530,6 +553,30 @@ setMethod("plot", signature(x = "biosign"),
               warning("'.sinkC' argument is deprecated; use 'info.txtC' instead.",
                       call. = FALSE)
               info.txtC <- .sinkC
+            }
+            
+            if (is.null(info.txtC)) {
+              warning("'info.txtC = NULL' argument value is deprecated; use 'info.txtC = 'none'' instead.",
+                      call. = FALSE)
+              info.txtC <- 'none'
+            }
+            
+            if (is.na(info.txtC)) {
+              warning("'info.txtC = NA' argument value is deprecated; use 'info.txtC = 'interactive'' instead.",
+                      call. = FALSE)
+              info.txtC <- 'interactive'
+            }
+            
+            if (is.null(fig.pdfC)) {
+              warning("'fig.pdfC = NULL' argument value is deprecated; use 'fig.pdfC = 'none'' instead.",
+                      call. = FALSE)
+              fig.pdfC <- 'none'
+            }
+            
+            if (is.na(fig.pdfC)) {
+              warning("'fig.pdfC = NA' argument value is deprecated; use 'fig.pdfC = 'interactive'' instead.",
+                      call. = FALSE)
+              fig.pdfC <- 'interactive'
             }
             
             if (fig.pdfC == "none")
