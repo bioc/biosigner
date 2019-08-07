@@ -421,7 +421,7 @@ for multivariate analysis, that:
 1. no clear separation can be observed by PCA:
 
 ```{r biomark_pca}
-biomark.pca <- ropls::opls(appleMN, fig.pdfC = NULL)
+biomark.pca <- ropls::opls(appleMN, fig.pdfC = "none")
 plot(biomark.pca, parAsColFcVn = spikeFc)
 ```
 

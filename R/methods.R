@@ -86,13 +86,13 @@ setMethod("biosign", signature(x = "data.frame"),
 #' sampled dataset?
 #' @param printL Logical: deprecated: use the 'info.txtC' argument instead
 #' @param plotL Logical: deprecated: use the 'fig.pdfC' argument instead
-#' @param .sinkC Character: Name of the file for R output diversion [default =
-#' NULL: no diversion]; Diversion of messages is required for the integration
-#' into Galaxy
-#' @param fig.pdfC Character: Figure filename ending with '.pdf'; default is NA
-#' (no saving; displaying instead); set to 'NULL' to prevent plotting
-#' @param info.txtC Character: Report filename for R output diversion [default =
-#' NA: no diversion]; set to 'NULL' to disable any verbose
+#' @param .sinkC Character: deprecated: use the 'info.txtC' argument instead
+#' @param fig.pdfC Character: File name with '.pdf' extension for the figure;
+#' if 'interactive' (default), figures will be displayed interactively; if 'none',
+#' no figure will be generated
+#' @param info.txtC Character: File name with '.txt' extension for the printed
+#' results (call to sink()'); if 'interactive' (default), messages will be
+#' printed on the screen; if 'none', no verbose will be generated
 #' @param ... Currently not used.
 #' @return An S4 object of class 'biosign' containing the following slots: 1)
 #' 'methodVc' character vector: selected classifier(s) ('plsda',
@@ -140,7 +140,7 @@ setMethod("biosign", signature(x = "data.frame"),
 #'                         experimentData = new("MIAME", 
 #'                                              title = "diaplasma"))
 #' set.seed(123)
-#' diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = NULL)
+#' diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = "none")
 #' diaSet <- getEset(diaSign)
 #' head(fData(diaSet))
 #' 
@@ -163,31 +163,31 @@ setMethod("biosign", signature(x = "matrix"),
                    
                    .sinkC = NULL,
                    
-                   fig.pdfC = NA,                   
-                   info.txtC = NA,                   
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
+                   info.txtC = c("none", "interactive", "myfile.txt")[2],                   
                    
                    ...) {
             
             if (!printL) {
-              warning("'printL' argument is deprecated; use 'info.txtC' instead",
+              warning("'printL' argument is deprecated; use 'info.txtC' instead.",
                       call. = FALSE)
-              info.txtC <- NULL
+              info.txtC <- "none"
             }
             
             if (!plotL) {
-              warning("'plotL' argument is deprecated; use 'fig.pdfC' instead",
+              warning("'plotL' argument is deprecated; use 'fig.pdfC' instead.",
                       call. = FALSE)
-              fig.pdfC <- NULL
+              fig.pdfC <- "none"
             }
             
             if (!is.null(.sinkC)) {
-              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead",
+              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead.",
                       call. = FALSE)
               info.txtC <- .sinkC
             }
             
             
-            if (!is.null(info.txtC) && !is.na(info.txtC)) ##  Diversion of messages is required for the integration into Galaxy
+            if (!(info.txtC %in% c("none", "interactive")))
               sink(info.txtC, append = TRUE)
             
             if (mode(x) != "numeric")
@@ -223,7 +223,7 @@ setMethod("biosign", signature(x = "matrix"),
             } else if (length(levels(y)) != 2) {
               stop("'y' must have two levels", call. = FALSE)
             } else if (any(is.na(y))) {
-              stop("'y' must not contain missing ('NA') values")
+              stop("'y' must not contain missing ('NA') values", call. = FALSE)
             } else
               yFc <- y
             
@@ -429,19 +429,19 @@ setMethod("biosign", signature(x = "matrix"),
             
             ## Printing
             
-            if (!is.null(info.txtC)) {
+            if (info.txtC != "none") {
               show(bsg)
               warnings()
             }
             
             ## Plotting
             
-            if (!all(is.na(bsg@accuracyMN["S", ])) && !is.null(fig.pdfC))
+            if (!all(is.na(bsg@accuracyMN["S", ])) && fig.pdfC != "none")
               plot(bsg, typeC = "tier", fig.pdfC = fig.pdfC)
             
             ## Closing connection
             
-            if (!is.null(info.txtC) && !is.na(info.txtC)) ## Used in the Galaxy module
+            if (!(info.txtC %in% c("none", "interactive")))
               sink()
             
             ## Returning
@@ -470,10 +470,12 @@ setMethod("biosign", signature(x = "matrix"),
 #' the individual boxplots of the features selected by all the classifiers
 #' @param file.pdfC Character: deprecated; use the 'fig.pdfC' argument instead
 #' @param .sinkC Character: deprecated; use the 'info.txtC' argument instead
-#' @param fig.pdfC Figure filename (e.g. in case of batch mode) ending with
-#' '.pdf'; default is NA (no saving; displaying instead)
-#' @param info.txtC Character: Report filename for R output diversion [default =
-#' NA: no diversion]
+#' @param fig.pdfC Character: File name with '.pdf' extension for the figure;
+#' if 'interactive' (default), figures will be displayed interactively; if 'none',
+#' no figure will be generated
+#' @param info.txtC Character: File name with '.txt' extension for the printed
+#' results (call to sink()'); if 'interactive' (default), messages will be
+#' printed on the screen; if 'none', no verbose will be generated
 #' @param ... Currently not used.
 #' @return A plot is created on the current graphics device.
 #' @author Philippe Rinaudo and Etienne Thevenot (CEA)
@@ -513,28 +515,28 @@ setMethod("plot", signature(x = "biosign"),
                    file.pdfC = NULL,
                    .sinkC = NULL,
                    
-                   fig.pdfC = NA,
-                   info.txtC = NA,
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
+                   info.txtC = c("none", "interactive", "myfile.txt")[2],
                    
                    ...) {
             
             if (!is.null(file.pdfC)) {
-              warning("'file.pdfC' argument is deprecated; use 'fig.pdfC' instead",
+              warning("'file.pdfC' argument is deprecated; use 'fig.pdfC' instead.",
                       call. = FALSE)
               fig.pdfC <- file.pdfC
             }
             
             if (!is.null(.sinkC)) {
-              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead",
+              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead.",
                       call. = FALSE)
               info.txtC <- .sinkC
             }
             
-            if (is.null(fig.pdfC))
-              stop("'fig.pdfC' cannot be set to NULL in the 'plot' method.",
+            if (fig.pdfC == "none")
+              stop("'fig.pdfC' cannot be set to 'none' in the 'plot' method.",
                    call. = FALSE)
             
-            if (!is.null(info.txtC) && !is.na(info.txtC)) ##  Diversion of messages is required for the integration into Galaxy
+            if (!(info.txtC %in% c("none", "interactive")))
               sink(info.txtC, append = TRUE)
             
             tierFullVc <- c("S", LETTERS[1:5])
@@ -542,10 +544,9 @@ setMethod("plot", signature(x = "biosign"),
             if (length(tierMaxC) != 1 || any(!(tierMaxC %in% tierFullVc))) {
               stop("'tierMaxC' argument must be either '",
                    paste(tierFullVc, collapse = "', '"),
-                   "' for the 'tier' plot",
-                   call. = FALSE)
+                   "' for the 'tier' plot.", call. = FALSE)
             } else if (typeC == "boxplot" && any(!(tierMaxC %in% c("S", "A")))) {
-              stop("'tierMaxC' argument must be either 'S' or 'A' for the 'boxplot'",
+              stop("'tierMaxC' argument must be either 'S' or 'A' for the 'boxplot'.",
                    call. = FALSE)
             } else
               tierVc <- tierFullVc[1:which(tierFullVc == tierMaxC)]
@@ -558,7 +559,7 @@ setMethod("plot", signature(x = "biosign"),
                        
                        stop("No signature up to tier '",
                             tierMaxC,
-                            "' to be plotted",
+                            "' to be plotted.",
                             call. = FALSE)
                        
                      }
@@ -578,14 +579,13 @@ setMethod("plot", signature(x = "biosign"),
                      
                      if (length(sgnAllVc) == 0) {
                        stop("No signature up to tier '",
-                            tail(tierVc, 1), "' to be plotted",
-                            call. = FALSE)
+                            tail(tierVc, 1), "' to be plotted.", call. = FALSE)
                      }
                      
                    })
             
             
-            if (!is.na(fig.pdfC))
+            if (fig.pdfC != "interactive")
               pdf(fig.pdfC)
             
             opar <- par(no.readonly = TRUE)
@@ -609,7 +609,6 @@ setMethod("plot", signature(x = "biosign"),
                      for (j in 1:ncol(inputMN))
                        inputMN[, j] <- tierFullVi[inputMC[, j]]
                      mode(inputMN) <- "numeric"
-                     
                      
                      imageMN <- inputMN
                      
@@ -860,13 +859,13 @@ setMethod("plot", signature(x = "biosign"),
             
             par(opar)
             
-            if (!is.na(fig.pdfC))
+            if (fig.pdfC != "interactive")
               dev.off()
             
             
             ## Closing connection
             
-            if (!is.null(info.txtC) && !is.na(info.txtC))
+            if (!(info.txtC %in% c("none", "interactive")))
               sink()
             
           })

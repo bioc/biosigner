@@ -14,7 +14,7 @@ test_that("biosign_plsda", {
                        diaplasma[["sampleMetadata"]][, "type"],
                        methodVc = "plsda",
                        bootI = 5,
-                       fig.pdfC = NULL)
+                       fig.pdfC = "none")
   
   set.seed(NULL)
   
@@ -28,7 +28,7 @@ test_that("biosign_plsda", {
     testthat::expect_identical(biosignLs@tierMC["m427.215t07.9", "plsda"],
                                "A")
     testthat::expect_equivalent(biosignLs@accuracyMN["S", "plsda"],
-                                0.7365702, tolerance = 1e-7)
+                                0.6520116, tolerance = 1e-7)
     
     library(ropls)
     
@@ -62,9 +62,9 @@ test_that("biosign_randomforest", {
                                "S")
     
     testthat::expect_equivalent(biosignLs@accuracyMN["AS", "randomforest"],
-                                0.7393993, tolerance = 1e-7)
+                                0.734806, tolerance = 1e-7)
     testthat::expect_equivalent(biosignLs@modelLs[["randomforest"]][["votes"]][2],
-                                0.005988024, tolerance = 1e-6)
+                                0, tolerance = 1e-6)
     
   }
   
@@ -89,11 +89,11 @@ test_that("biosign_svm", {
   if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(biosignLs@tierMC["m123.998t01.0", "svm"],
-                               "A")
+                               "E")
     testthat::expect_equivalent(biosignLs@accuracyMN["AS", "svm"],
-                                0.8313882, tolerance = 1e-7)
+                                0.7443567, tolerance = 1e-7)
     testthat::expect_equivalent(biosignLs@AS[["modelLs"]][["svm"]][["rho"]],
-                                -0.7013267, tolerance = 1e-6)
+                                -0.7788987, tolerance = 1e-6)
     
   }
 })
@@ -152,7 +152,7 @@ test_that("biosign_diaplasma", {
     
     testthat::expect_identical(getSignatureLs(biosignLs), sigLs)
     
-    accMC <- matrix(c("0.7234427", "0.6964646", "0.7620893", "0.7015924", "0.7970713", "0.714572", "0.7458978", "0.5143775", NA),
+    accMC <- matrix(c("0.7178939", "0.7464452", "0.737702", "0.703651", "0.8389099", "0.6439541", "0.7066359", "0.6589018", NA),
                     nrow = 3,
                     ncol = 3,
                     dimnames = list(c("Full", "AS", "S"),
@@ -183,18 +183,16 @@ test_that("biosign_sacurine", {
   set.seed(NULL)
   
   
-  sigLs <- list(plsda = c("Oxoglutaric acid", "p-Anisic acid", "Testosterone glucuronide", "Acetylphenylalanine", "Malic acid", "Pantothenic acid", "Gluconic acid and/or isomers", "alpha-N-Phenylacetyl-glutamine", "Citric acid", "Glucuronic acid and/or isomers", "Hippuric acid", "Phe-Tyr-Asp (and isomers)", "Threonic acid/Erythronic acid"),
-                randomforest = c("Oxoglutaric acid", "p-Anisic acid", "Testosterone glucuronide"),
-                svm = c("Oxoglutaric acid", "p-Anisic acid", "Testosterone glucuronide", "Acetylphenylalanine", "Malic acid", "Pantothenic acid", "Taurine", "N4-Acetylcytidine", "Monoethyl phthalate"),
-                complete = c("Oxoglutaric acid", "p-Anisic acid", "Testosterone glucuronide", "Acetylphenylalanine", "Malic acid", "Pantothenic acid", "Gluconic acid and/or isomers", "Taurine", "N4-Acetylcytidine", "alpha-N-Phenylacetyl-glutamine", "Citric acid", "Glucuronic acid and/or isomers", "Hippuric acid", "Monoethyl phthalate", "Phe-Tyr-Asp (and isomers)", "Threonic acid/Erythronic acid"))
+  sigLs <- list(plsda = c("p-Anisic acid", "Testosterone glucuronide", "Malic acid", "Pantothenic acid"),
+                randomforest = c("p-Anisic acid", "Testosterone glucuronide", "Oxoglutaric acid"),
+                svm = c("p-Anisic acid", "Testosterone glucuronide", "Oxoglutaric acid", "N2-Acetylaminoadipic acid", "N4-Acetylcytidine"),
+                complete = c("p-Anisic acid", "Testosterone glucuronide", "Oxoglutaric acid", "Malic acid", "N2-Acetylaminoadipic acid", "N4-Acetylcytidine", "Pantothenic acid"))
   
   if (.Platform$OS.type != "windows" || .Machine$sizeof.pointer == 8) {
     
     testthat::expect_identical(getSignatureLs(biosignLs), sigLs)
     
-    accMC <- matrix(c("0.8958831", "0.8622427", "0.8690036",
-                      "0.8933625", "0.8792595", "0.8688045",
-                      "0.8974811", "0.9100602", "0.8964705"),
+    accMC <- matrix(c("0.8713552", "0.9211478", "0.8373789", "0.8539239", "0.8675991", "0.8644966", "0.9086947", "0.8895256", "0.8724575"),
                     nrow = 3,
                     ncol = 3,
                     dimnames = list(c("Full", "AS", "S"),

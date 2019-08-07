@@ -15,7 +15,8 @@
 \S4method{biosign}{matrix}(x, y, methodVc = c("all", "plsda",
   "randomforest", "svm")[1], bootI = 50, pvalN = 0.05, permI = 1,
   fixRankL = FALSE, printL = TRUE, plotL = TRUE, .sinkC = NULL,
-  fig.pdfC = NA, info.txtC = NA, ...)
+  fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
+  info.txtC = c("none", "interactive", "myfile.txt")[2], ...)
 }
 \arguments{
 \item{x}{Numerical data frame or matrix (observations x variables), or
@@ -49,15 +50,15 @@ sampled dataset?}
 
 \item{plotL}{Logical: deprecated: use the 'fig.pdfC' argument instead}
 
-\item{.sinkC}{Character: Name of the file for R output diversion [default =
-NULL: no diversion]; Diversion of messages is required for the integration
-into Galaxy}
+\item{.sinkC}{Character: deprecated: use the 'info.txtC' argument instead}
 
-\item{fig.pdfC}{Character: Figure filename ending with '.pdf'; default is NA
-(no saving; displaying instead); set to 'NULL' to prevent plotting}
+\item{fig.pdfC}{Character: File name with '.pdf' extension for the figure;
+if 'interactive' (default), figures will be displayed interactively; if 'none',
+no figure will be generated}
 
-\item{info.txtC}{Character: Report filename for R output diversion [default =
-NA: no diversion]; set to 'NULL' to disable any verbose}
+\item{info.txtC}{Character: File name with '.txt' extension for the printed
+results (call to sink()'); if 'interactive' (default), messages will be
+printed on the screen; if 'none', no verbose will be generated}
 }
 \value{
 An S4 object of class 'biosign' containing the following slots: 1)
@@ -110,7 +111,7 @@ diaSet <- ExpressionSet(assayData = t(dataMatrix),
                         experimentData = new("MIAME", 
                                              title = "diaplasma"))
 set.seed(123)
-diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = NULL)
+diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = "none")
 diaSet <- getEset(diaSign)
 head(fData(diaSet))
 
