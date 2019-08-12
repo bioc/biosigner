@@ -15,7 +15,7 @@ output:
 ---
 
 ```{r global_options, include=FALSE}
-knitr::opts_chunk$set(fig.width=6, fig.height=6, fig.path='figures/')
+knitr::opts_chunk$set(fig.width = 6, fig.height = 6, fig.path = 'figures/')
 ```
 
 # Introduction
@@ -121,9 +121,9 @@ function from the (imported)
 ```{r diaplasma_strF}
 attach(diaplasma)
 library(ropls)
-strF(dataMatrix)
-strF(sampleMetadata)
-strF(variableMetadata)
+ropls::strF(dataMatrix)
+ropls::strF(sampleMetadata)
+ropls::strF(variableMetadata)
 ```
 
 We see that the **diaplasma** list contains three objects:
@@ -179,9 +179,7 @@ variableMetadata <- variableMetadata[featureSelVl, ]
 ```
 
 ```{r biosign}
-set.seed(123)
-diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
-set.seed(NULL)
+diaSign <- biosigner::biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 ```
 **Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and *SVM*
 classifiers extracted from the diaplasma dataset. The *S* tier corresponds to the
@@ -204,17 +202,16 @@ The arguments are:
   generating this vignette; we however recommend to keep the default 50 value
   for your analyzes (otherwise signatures may be less stable).
 
++ The `set.seed` argument ensures that the results from this
+  vignette can be reproduced exactly; by choosing alternative seeds (and the
+  default `bootI` = 50), similar signatures are obtained, showing the stability
+  of the selection.
+
 Note:
 
-1. If some features from the `x` matrix/data frame contain missing values (NA),
-   these features will be removed prior to modeling with Random Forest and SVM
-   (in contrast, the NIPALS algorithm from PLS-DA can handle missing values),
-
-2. The `set.seed` command was used here to be sure that the results from this
-   vignette can be reproduced exactly; by choosing alternative seeds (and the
-   default `bootI` = 50), similar signatures are obtained, showing the stability
-   of the selection.
-
++ If some features from the `x` matrix/data frame contain missing values (NA),
+  these features will be removed prior to modeling with Random Forest and SVM
+  (in contrast, the NIPALS algorithm from PLS-DA can handle missing values),
 
 The resulting signatures for the 3 selected classifiers are both printed and
 plotted as **tiers** from *S*, *A*, up to *E* by decreasing relevance. The (*S*)
@@ -242,7 +239,7 @@ The **individual boxplots** of the features from the *complete* signature can be
 visualized with:
 
 ```{r boxplot}
-plot(diaSign, typeC = "boxplot")
+biosigner::plot(diaSign, typeC = "boxplot")
 ```
 **Figure 3:** Individual boxplots of the features selected for at least one of
 the classification methods. Features selected for a single classifier are
@@ -254,11 +251,6 @@ Let us see the metadata of the *complete* signature:
 variableMetadata[getSignatureLs(diaSign)[["complete"]], ]
 ```
 
-We observe that the *taurochenodeoxycholic acid* has been annotated, in addition
-to another [M-H]- ion at 470.233 Da. Six out of the 8 features are very
-significant by univariate hypothesis testings of difference between *type*
-medians, and to a lesser extent, of the correlation with *age* and *body mass
-index*.
 
 ## Predictions
 
@@ -272,10 +264,8 @@ testVi <- setdiff(1:nrow(dataMatrix), trainVi)
 ```
 
 ```{r biosign_train, warning = FALSE}
-set.seed(123)
-diaTrain <- biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
+diaTrain <- biosigner::biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
 bootI = 5)
-set.seed(NULL)
 ```
 **Figure 4:** Signatures from the training data set.
 
@@ -283,7 +273,7 @@ We extract the **fitted** types on the training dataset restricted to the *S*
 signatures:
 
 ```{r predict}
-diaFitDF <- predict(diaTrain)
+diaFitDF <- biosigner::predict(diaTrain)
 ```
 
 We then print the confusion tables for each classifier:
@@ -308,13 +298,13 @@ Note that these values are slightly different from the accuracies returned by
 selected by the *bootI* (or *crossvalI*) arguments:
 
 ```{r getAccuracy}
-round(getAccuracyMN(diaTrain)["S", ], 3)
+round(biosigner::getAccuracyMN(diaTrain)["S", ], 3)
 ```
 
 Finally, we can compute the performances on the test subset:
 
 ```{r performance}
-diaTestDF <- predict(diaTrain, newdata = dataMatrix[testVi, ])
+diaTestDF <- biosigner::predict(diaTrain, newdata = dataMatrix[testVi, ])
 sapply(diaTestDF, function(predFc) {
 conf <- table(sampleMetadata[testVi, "type"], predFc)
 conf <- sweep(conf, 1, rowSums(conf), "/")
@@ -342,11 +332,9 @@ the *diaplasma* data set, and we subsequently perform signature discovery:
 
 ```{r expressionset_code, eval = FALSE, message = FALSE, warning = FALSE}
 library(Biobase)
-diaSet <- ExpressionSet(assayData = t(dataMatrix),
+diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix),
 phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
-set.seed(123)
-biosign(diaSet, "type", bootI = 5)
-set.seed(NULL)
+biosigner::biosign(diaSet, "type", bootI = 5)
 ```
 
 Note: Because of identical names in the two packages, the `combine` method from
@@ -383,11 +371,9 @@ We can for instance look for signatures of the *gender*:
 
 ```{r sacurine}
 data(sacurine)
-set.seed(123) ##
-sacSign <- biosign(sacurine[["dataMatrix"]],
+sacSign <- biosigner::biosign(sacurine[["dataMatrix"]],
 sacurine[["sampleMetadata"]][, "gender"],
 methodVc = "plsda")
-set.seed(NULL)
 ```
 **Figure 5:** PLS-DA signature from the 'sacurine' data set.
 
@@ -422,7 +408,7 @@ for multivariate analysis, that:
 
 ```{r biomark_pca}
 biomark.pca <- ropls::opls(appleMN, fig.pdfC = "none")
-plot(biomark.pca, parAsColFcVn = spikeFc)
+ropls::plot(biomark.pca, parAsColFcVn = spikeFc)
 ```
 
 2. PLS-DA modeling with the full dataset is not significant (as seen on
@@ -436,14 +422,11 @@ biomark.pls <- ropls::opls(appleMN, spikeFc)
 Let us now extract the molecular signatures:
 
 ```{r apple_biosign, warning = FALSE}
-set.seed(123)
-appleSign <- biosign(appleMN, spikeFc)
-set.seed(NULL)
+appleSign <- biosigner::biosign(appleMN, spikeFc)
 ```
 
 The *449.1/327* corresponds to the Cyanidin-3-galactoside (absent in the
-control) and the *475.1/434.7* is probably a potassium adduct of the Phloridzin
-(80% concentration increase in group1; @Franceschi2012).
+control; @Franceschi2012).
 
 ```{r annotation}
 annotDF <- SpikePos[["annotation"]]
@@ -468,15 +451,13 @@ golubMN <- t(exprs(Golub_Merge))
 leukemiaFc <- pData(Golub_Merge)[["ALL.AML"]]
 table(leukemiaFc)
 varSubVi <- 1501:2000
-set.seed(123)
-golubSign <- biosign(golubMN[, varSubVi], leukemiaFc, methodVc = "svm")
-set.seed(NULL)
+golubSign <- biosigner::biosign(golubMN[, varSubVi], leukemiaFc, methodVc = "svm")
 ```
 **Figure 6:** SVM signature from the *golub* data set.
 
-The computation results in a signature of 2 features only and a sparse SVM model
-performing almost as well (94.4% accuracy) as the model trained on the dataset
-of 500 variables (95.0% accuracy).
+The computation results in a signature of 4 features only and a sparse SVM model
+performing even better (95.9% accuracy) than the model trained on the dataset
+of 500 variables (95.5% accuracy).
 
 The
 [hu6800.db](https://bioconductor.org/packages/release/data/annotation/html/hu6800.db.html)
@@ -485,14 +466,14 @@ bioconductor package can be used to get the annotation of the selected probes
 
 ```{r hu6800, warning = FALSE, message = FALSE}
 library(hu6800.db)
-sapply(getSignatureLs(golubSign)[["complete"]],
+sapply(biosigner::getSignatureLs(golubSign)[["complete"]],
        function(probeC)
        get(probeC, env = hu6800GENENAME))
 ```
 
 Cystatin C is part of the 50 gene signature selected by Golub and colleagues on
 the basis of a metric derived from the Student's statistic of mean differences
-between the AML and ALL groups [@Golub1999]. Interestingly, the second probe,
+between the AML and ALL groups [@Golub1999]. Interestingly, the third probe,
 myeloperoxidase, is a cytochemical marker for the diagnosis (and also
 potentially the prognosis) of acute myeloid leukemia (AML).
 

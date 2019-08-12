@@ -1,8 +1,8 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.13.4
-Date: 2019-08-07
+Version: 1.13.6
+Date: 2019-08-12
 Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
     <etienne.thevenot@cea.fr>
 Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
@@ -24,6 +24,7 @@ Depends:
 Imports:
     methods,
     e1071,
+    MultiDataSet,
     randomForest
 Suggests:
     BioMark,
@@ -32,6 +33,7 @@ Suggests:
     golubEsets,
     hu6800.db,
     knitr,
+    omicade4,
     rmarkdown,
     testthat
 VignetteBuilder: knitr

@@ -5,13 +5,13 @@
 \alias{getEset,biosign-method}
 \alias{getEset}
 \alias{getEset,}
-\alias{opls-method}
+\alias{biosign-method}
 \title{getEset method}
 \usage{
 \S4method{getEset}{biosign}(object)
 }
 \arguments{
-\item{object}{An S4 object of class \code{opls}, created by \code{opls}
+\item{object}{An S4 object of class \code{biosign}, created by \code{biosign}
 function.}
 }
 \value{
