@@ -12,7 +12,7 @@
 \S4method{plot}{biosignMultiDataSet,ANY}(x, y, ...)
 
 \S4method{plot}{biosign,ANY}(x, y, tierMaxC = "S", typeC = c("tier",
-  "boxplot")[1], file.pdfC = NULL, .sinkC = NULL, subC = NA,
+  "boxplot")[1], file.pdfC = NULL, .sinkC = NULL, plotSubC = NA,
   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
   info.txtC = c("none", "interactive", "myfile.txt")[2], ...)
 }
@@ -36,7 +36,7 @@ the individual boxplots of the features selected by all the classifiers}
 
 \item{.sinkC}{Character: deprecated; use the 'info.txtC' argument instead}
 
-\item{subC}{Character: Data set name to be used in the subtitle}
+\item{plotSubC}{Character: Graphic subtitle}
 
 \item{fig.pdfC}{Character: File name with '.pdf' extension for the figure;
 if 'interactive' (default), figures will be displayed interactively; if 'none',

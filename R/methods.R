@@ -65,13 +65,13 @@ setMethod("biosign", signature(x = "MultiDataSet"),
                 
                 plot(setBiosign,
                      typeC = "tier",
+                     plotSubC = paste0("[", setC, "]"),
                      ...)
-                # title(setC, line = 1, adj = 0, outer = TRUE)
                 
                 plot(setBiosign,
                      typeC = "boxplot",
+                     plotSubC = paste0("[", setC, "]"),
                      ...)
-                # title(setC, line = 1, adj = 0, outer = TRUE)
                 
               }
               
@@ -188,6 +188,7 @@ setMethod("biosign", signature(x = "data.frame"),
 #' @param .sinkC Character: deprecated: use the 'info.txtC' argument instead
 #' @param seedI integer: optional seed to obtain exactly the same signature when
 #' rerunning biosigner; default is '123'; set to NULL to prevent seed setting
+#' @param plotSubC Character: Graphic subtitle
 #' @param fig.pdfC Character: File name with '.pdf' extension for the figure;
 #' if 'interactive' (default), figures will be displayed interactively; if 'none',
 #' no figure will be generated
@@ -306,6 +307,7 @@ setMethod("biosign", signature(x = "matrix"),
                    .sinkC = NULL,
                    
                    seedI = 123,
+                   plotSubC = NA,
                    fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
                    info.txtC = c("none", "interactive", "myfile.txt")[2],                   
                    
@@ -639,7 +641,7 @@ setMethod("biosign", signature(x = "matrix"),
             ## Plotting
             
             if (!all(is.na(bsg@accuracyMN["S", ])) && fig.pdfC != "none")
-              plot(bsg, typeC = "tier", fig.pdfC = fig.pdfC)
+              plot(bsg, typeC = "tier", plotSubC = plotSubC, fig.pdfC = fig.pdfC)
             
             ## Closing connection
             
@@ -672,7 +674,7 @@ setMethod("biosign", signature(x = "matrix"),
 #' the individual boxplots of the features selected by all the classifiers
 #' @param file.pdfC Character: deprecated; use the 'fig.pdfC' argument instead
 #' @param .sinkC Character: deprecated; use the 'info.txtC' argument instead
-#' @param subC Character: Data set name to be used in the subtitle
+#' @param plotSubC Character: Graphic subtitle
 #' @param fig.pdfC Character: File name with '.pdf' extension for the figure;
 #' if 'interactive' (default), figures will be displayed interactively; if 'none',
 #' no figure will be generated
@@ -718,7 +720,7 @@ setMethod("plot", signature(x = "biosign"),
                    file.pdfC = NULL,
                    .sinkC = NULL,
  
-                   subC = NA,                  
+                   plotSubC = NA,                  
                    fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
                    info.txtC = c("none", "interactive", "myfile.txt")[2],
                    
@@ -1045,8 +1047,8 @@ setMethod("plot", signature(x = "biosign"),
                      ## Title
                      
                      mainC <- "Tiers of the selected features"
-                     if (!is.na(subC))
-                       mainC <- paste0(mainC, " \n", subC)
+                     if (!is.na(plotSubC))
+                       mainC <- paste0(mainC, " \n", plotSubC)
                      
                      title(mainC, adj = 0.1, outer = TRUE, line = -2.5)
                      
@@ -1090,8 +1092,8 @@ setMethod("plot", signature(x = "biosign"),
                        mtext(bmkModVc, line = 0.1, cex = 0.6)
                      }
                      mainC <- paste0("'", switch(tierMaxC, S = "S", A = "S+A"), "' signature")
-                     if (!is.na(subC))
-                       mainC <- paste0(mainC, " ", subC)
+                     if (!is.na(plotSubC))
+                       mainC <- paste0(mainC, " ", plotSubC)
                      title(main = mainC,
                            line = 0.5, cex.main = 1.5, outer = TRUE)
                      

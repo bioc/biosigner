@@ -20,8 +20,9 @@
 \S4method{biosign}{matrix}(x, y, methodVc = c("all", "plsda",
   "randomforest", "svm")[1], bootI = 50, pvalN = 0.05, permI = 1,
   fixRankL = FALSE, printL = TRUE, plotL = TRUE, .sinkC = NULL,
-  seedI = 123, fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
-  info.txtC = c("none", "interactive", "myfile.txt")[2], ...)
+  seedI = 123, plotSubC = NA, fig.pdfC = c("none", "interactive",
+  "myfile.pdf")[2], info.txtC = c("none", "interactive",
+  "myfile.txt")[2], ...)
 }
 \arguments{
 \item{x}{Numerical data frame or matrix (observations x variables), or
@@ -67,6 +68,8 @@ sampled dataset?}
 \item{plotL}{Logical: deprecated: use the 'fig.pdfC' argument instead}
 
 \item{.sinkC}{Character: deprecated: use the 'info.txtC' argument instead}
+
+\item{plotSubC}{Character: Graphic subtitle}
 }
 \value{
 An S4 object of class 'biosign' containing the following slots: 1)
