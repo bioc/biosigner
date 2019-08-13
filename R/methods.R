@@ -634,7 +634,6 @@ setMethod("biosign", signature(x = "matrix"),
             
             if (info.txtC != "none") {
               show(bsg)
-              warnings()
             }
             
             ## Plotting
@@ -1206,7 +1205,7 @@ setMethod("predict", signature(object = "biosign"),
               
               fitLs <- fitLs[!sapply(fitLs, is.null)]
               
-              if(length(fitLs) == 0) {
+              if (length(fitLs) == 0) {
                 warning("Empty signatures for all classifiers up to tier '", tierMaxC, "'; fitted output is set to NULL", call. = FALSE)
                 return(invisible(NULL))
               } else
@@ -1214,7 +1213,7 @@ setMethod("predict", signature(object = "biosign"),
               
             } else {
               
-              if(is.data.frame(newdata)) {
+              if (is.data.frame(newdata)) {
                 if(!all(sapply(newdata, data.class) == "numeric")) {
                   stop("'newdata' data frame must contain numeric columns only", call. = FALSE)
                 }
@@ -1236,7 +1235,7 @@ setMethod("predict", signature(object = "biosign"),
                         call. = FALSE)
               }
               
-              if(length(signatureLs[["complete"]]) == 0){
+              if (length(signatureLs[["complete"]]) == 0){
                 
                 warning("Signatures from all classifiers up to tier '", tierMaxC, "' are empty; prediction output is set to NULL", call. = FALSE)
                 
@@ -1322,13 +1321,13 @@ setMethod("show",
               
               tierFullVc <- c("S", "A", "B", "C", "D", "E")
               
-              if(any(!(tierMaxC %in% tierFullVc))) {
+              if (any(!(tierMaxC %in% tierFullVc))) {
                 stop("'tierMaxC' argument must be in '", paste(tierFullVc, collapse = "', '"), "'", call. = FALSE)
               } else
                 tierVc <- tierFullVc[1:which(tierFullVc == tierMaxC)]
               
-              if(sum(object@tierMC %in% tierVc)) {
-                if(length(setdiff(tierVc, c(object@tierMC)))) {
+              if (sum(object@tierMC %in% tierVc)) {
+                if (length(setdiff(tierVc, c(object@tierMC)))) {
                   tierNotFoundVc <- tierFullVc[tierFullVc %in% setdiff(tierVc, c(object@tierMC))]
                   warning("tierMC does not contain the following values: '", paste(tierNotFoundVc, collapse = "', '"), "'", call. = FALSE)
                 }

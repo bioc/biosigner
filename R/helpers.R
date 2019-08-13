@@ -337,22 +337,22 @@ getImportanceF <- function(model = NULL,
                            ## predArgLs=NULL
                            ){
 
-    if(class(model) == "svm"){ ## weights (w)
+    if (class(model) == "svm"){ ## weights (w)
 
         varImpVn <- (t(model[["coefs"]]) %*% xTrainMN[model[["index"]],])^2
 
     }
-    else if(class(model) == "opls"){ ## VIP
+    else if (class(model) == "opls"){ ## VIP
 
         ## initialize
         varImpVn <- rep(0, ncol(xTrainMN))
         ## get the variable with a VIP:
-        vipVn <- getVipVn(model)
+        vipVn <- ropls::getVipVn(model)
         vipVi <- which(colnames(xTrainMN) %in% names(vipVn))
         varImpVn[vipVi] <- vipVn
 
     }
-    else if(class(model) == "randomForest"){
+    else if (class(model) == "randomForest"){
 
         varImpVn <- model[["importance"]][, 1]
 
@@ -404,7 +404,7 @@ getModelF <- function(xMN = NULL,
     names(argFulLs) <- argNamFulVc
     ## generates the model from training set
     if (methC == "opls") {
-      optWrnN <- options()$warn
+      optWrnN <- getOption("warn")
       options(warn = -1)
       model <- try(do.call(methC, argFulLs), silent = TRUE)
       if (inherits(model, "try-error") &&
