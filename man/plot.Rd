@@ -12,9 +12,9 @@
 \S4method{plot}{biosignMultiDataSet,ANY}(x, y, ...)
 
 \S4method{plot}{biosign,ANY}(x, y, tierMaxC = "S", typeC = c("tier",
-  "boxplot")[1], file.pdfC = NULL, .sinkC = NULL, plotSubC = NA,
-  fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
-  info.txtC = c("none", "interactive", "myfile.txt")[2], ...)
+  "boxplot")[1], plotSubC = NA, fig.pdfC = c("none", "interactive",
+  "myfile.pdf")[2], info.txtC = c("none", "interactive",
+  "myfile.txt")[2], file.pdfC = NULL, .sinkC = NULL, ...)
 }
 \arguments{
 \item{x}{An S4 object of class \code{biosignMultiDataSet}, created by the \code{biosign}
@@ -32,10 +32,6 @@ number of selections}
 comparison of signatures up to the selected 'tierMaxC' or 'boxplot' showing
 the individual boxplots of the features selected by all the classifiers}
 
-\item{file.pdfC}{Character: deprecated; use the 'fig.pdfC' argument instead}
-
-\item{.sinkC}{Character: deprecated; use the 'info.txtC' argument instead}
-
 \item{plotSubC}{Character: Graphic subtitle}
 
 \item{fig.pdfC}{Character: File name with '.pdf' extension for the figure;
@@ -45,6 +41,10 @@ no figure will be generated}
 \item{info.txtC}{Character: File name with '.txt' extension for the printed
 results (call to sink()'); if 'interactive' (default), messages will be
 printed on the screen; if 'none', no verbose will be generated}
+
+\item{file.pdfC}{Character: deprecated; use the 'fig.pdfC' argument instead}
+
+\item{.sinkC}{Character: deprecated; use the 'info.txtC' argument instead}
 
 \item{x}{An S4 object of class \code{biosign}, created by the \code{biosign}
 function.}

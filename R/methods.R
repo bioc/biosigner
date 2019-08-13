@@ -183,9 +183,6 @@ setMethod("biosign", signature(x = "data.frame"),
 #' @param fixRankL Logical: Should the initial ranking be computed with the
 #' full model only, or as the median of the ranks from the models built on the
 #' sampled dataset?
-#' @param printL Logical: deprecated: use the 'info.txtC' argument instead
-#' @param plotL Logical: deprecated: use the 'fig.pdfC' argument instead
-#' @param .sinkC Character: deprecated: use the 'info.txtC' argument instead
 #' @param seedI integer: optional seed to obtain exactly the same signature when
 #' rerunning biosigner; default is '123'; set to NULL to prevent seed setting
 #' @param plotSubC Character: Graphic subtitle
@@ -195,6 +192,9 @@ setMethod("biosign", signature(x = "data.frame"),
 #' @param info.txtC Character: File name with '.txt' extension for the printed
 #' results (call to sink()'); if 'interactive' (default), messages will be
 #' printed on the screen; if 'none', no verbose will be generated
+#' @param printL Logical: deprecated: use the 'info.txtC' argument instead
+#' @param plotL Logical: deprecated: use the 'fig.pdfC' argument instead
+#' @param .sinkC Character: deprecated: use the 'info.txtC' argument instead
 #' @param ... Currently not used.
 #' @return An S4 object of class 'biosign' containing the following slots: 1)
 #' 'methodVc' character vector: selected classifier(s) ('plsda',
@@ -301,16 +301,14 @@ setMethod("biosign", signature(x = "matrix"),
                    permI = 1,
                    fixRankL = FALSE,
                    
-                   printL = TRUE,
-                   plotL = TRUE,
-                   
-                   .sinkC = NULL,
-                   
                    seedI = 123,
                    plotSubC = NA,
                    fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
                    info.txtC = c("none", "interactive", "myfile.txt")[2],                   
                    
+                   printL = TRUE,
+                   plotL = TRUE,
+                   .sinkC = NULL,
                    ...) {
             
             if (!printL) {
@@ -672,8 +670,6 @@ setMethod("biosign", signature(x = "matrix"),
 #' @param typeC Character: Plot type; either 'tier' [default] displaying the
 #' comparison of signatures up to the selected 'tierMaxC' or 'boxplot' showing
 #' the individual boxplots of the features selected by all the classifiers
-#' @param file.pdfC Character: deprecated; use the 'fig.pdfC' argument instead
-#' @param .sinkC Character: deprecated; use the 'info.txtC' argument instead
 #' @param plotSubC Character: Graphic subtitle
 #' @param fig.pdfC Character: File name with '.pdf' extension for the figure;
 #' if 'interactive' (default), figures will be displayed interactively; if 'none',
@@ -681,6 +677,8 @@ setMethod("biosign", signature(x = "matrix"),
 #' @param info.txtC Character: File name with '.txt' extension for the printed
 #' results (call to sink()'); if 'interactive' (default), messages will be
 #' printed on the screen; if 'none', no verbose will be generated
+#' @param file.pdfC Character: deprecated; use the 'fig.pdfC' argument instead
+#' @param .sinkC Character: deprecated; use the 'info.txtC' argument instead
 #' @param ... Currently not used.
 #' @return A plot is created on the current graphics device.
 #' @author Philippe Rinaudo and Etienne Thevenot (CEA)
@@ -717,13 +715,13 @@ setMethod("plot", signature(x = "biosign"),
                    y,
                    tierMaxC = "S",
                    typeC = c("tier", "boxplot")[1],
-                   file.pdfC = NULL,
-                   .sinkC = NULL,
  
                    plotSubC = NA,                  
                    fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
                    info.txtC = c("none", "interactive", "myfile.txt")[2],
                    
+                   file.pdfC = NULL,
+                   .sinkC = NULL,
                    ...) {
             
             if (!is.null(file.pdfC)) {
