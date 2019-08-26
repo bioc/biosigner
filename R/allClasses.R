@@ -13,7 +13,7 @@
 #' a MultiDataSet instance
 #' @seealso \code{\link{biosign}}
 #' @examples
-#' In progress
+#' # In progress
 #' @exportClass biosignMultiDataSet
 setClass(Class = "biosignMultiDataSet",
          representation = representation(biosignLs = "list"))

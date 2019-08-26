@@ -22,7 +22,7 @@ a MultiDataSet instance
 }
 
 \examples{
-In progress
+# In progress
 }
 \seealso{
 \code{\link{biosign}}
