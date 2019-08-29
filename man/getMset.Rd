@@ -61,6 +61,6 @@ nciMset
 nciBiosign <- biosigner::biosign(nciMset, "cancer")
 nciMset <- biosigner::getMset(nciBiosign)
 # In the updated MultiDataSet, the updated featureData now contains the cancer_biosign_'classifier' columns
-indicating the selected features
+# indicating the selected features
 lapply(fData(nciMset), head)
 }
