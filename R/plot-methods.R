@@ -4,10 +4,7 @@
 #'
 #' This function plots signatures obtained by \code{biosign}.
 #'
-#' @aliases plot.biosignMultiDataSet plot,biosign-method
-#' @param x An S4 object of class \code{biosignMultiDataSet}, created by the \code{biosign}
-#' function applied to a MultiDataSet instance.
-#' @param ... Currently not used.
+#' @aliases plot.biosignMultiDataSet plot,biosignMultiDataSet-method
 #' @examples
 #' # Loading the 'NCI60_4arrays' from the 'omicade4' package
 #' data("NCI60_4arrays", package = "omicade4")

@@ -4,9 +4,10 @@
 \name{plot,biosignMultiDataSet,ANY-method}
 \alias{plot,biosignMultiDataSet,ANY-method}
 \alias{plot.biosignMultiDataSet}
-\alias{plot,biosign-method}
+\alias{plot,biosignMultiDataSet-method}
 \alias{plot,biosign,ANY-method}
 \alias{plot.biosign}
+\alias{plot,biosign-method}
 \title{Plot method for biosign signatures}
 \usage{
 \S4method{plot}{biosignMultiDataSet,ANY}(x, y, ...)
@@ -17,8 +18,8 @@
   "myfile.txt")[2], file.pdfC = NULL, .sinkC = NULL, ...)
 }
 \arguments{
-\item{x}{An S4 object of class \code{biosignMultiDataSet}, created by the \code{biosign}
-function applied to a MultiDataSet instance.}
+\item{x}{An S4 object of class \code{biosign}, created by the \code{biosign}
+function.}
 
 \item{y}{Currently not used.}
 
@@ -45,11 +46,6 @@ printed on the screen; if 'none', no verbose will be generated}
 \item{file.pdfC}{Character: deprecated; use the 'fig.pdfC' argument instead}
 
 \item{.sinkC}{Character: deprecated; use the 'info.txtC' argument instead}
-
-\item{x}{An S4 object of class \code{biosign}, created by the \code{biosign}
-function.}
-
-\item{...}{Currently not used.}
 }
 \value{
 A plot is created on the current graphics device.
