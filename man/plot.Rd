@@ -10,7 +10,9 @@
 \alias{plot,biosign-method}
 \title{Plot method for biosign signatures}
 \usage{
-\S4method{plot}{biosignMultiDataSet,ANY}(x, y, ...)
+\S4method{plot}{biosignMultiDataSet,ANY}(x, y, fig.pdfC = c("none",
+  "interactive", "myfile.pdf")[2], info.txtC = c("none", "interactive",
+  "myfile.txt")[2], ...)
 
 \S4method{plot}{biosign,ANY}(x, y, tierMaxC = "S", typeC = c("tier",
   "boxplot")[1], plotSubC = NA, fig.pdfC = c("none", "interactive",
@@ -23,6 +25,14 @@ function.}
 
 \item{y}{Currently not used.}
 
+\item{fig.pdfC}{Character: File name with '.pdf' extension for the figure;
+if 'interactive' (default), figures will be displayed interactively; if 'none',
+no figure will be generated}
+
+\item{info.txtC}{Character: File name with '.txt' extension for the printed
+results (call to sink()'); if 'interactive' (default), messages will be
+printed on the screen; if 'none', no verbose will be generated}
+
 \item{...}{Currently not used.}
 
 \item{tierMaxC}{Character: Maximum level of tiers to display: Either 'S' and
@@ -34,14 +44,6 @@ comparison of signatures up to the selected 'tierMaxC' or 'boxplot' showing
 the individual boxplots of the features selected by all the classifiers}
 
 \item{plotSubC}{Character: Graphic subtitle}
-
-\item{fig.pdfC}{Character: File name with '.pdf' extension for the figure;
-if 'interactive' (default), figures will be displayed interactively; if 'none',
-no figure will be generated}
-
-\item{info.txtC}{Character: File name with '.txt' extension for the printed
-results (call to sink()'); if 'interactive' (default), messages will be
-printed on the screen; if 'none', no verbose will be generated}
 
 \item{file.pdfC}{Character: deprecated; use the 'fig.pdfC' argument instead}
 

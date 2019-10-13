@@ -49,16 +49,46 @@
 setMethod("plot", signature(x = "biosignMultiDataSet"),
           function(x,
                    y,
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
+                   info.txtC = c("none", "interactive", "myfile.txt")[2],
                    ...) {
+            
+            if (!(info.txtC %in% c("none", "interactive"))) {
+              sink(info.txtC, append = TRUE)
+            }
+            
+            infTxtC <- info.txtC
+            if (infTxtC != "none")
+              infTxtC <- "interactive"
+            
+            if (!(fig.pdfC %in% c("none", "interactive"))) {
+              pdf(fig.pdfC)
+            }
+            
+            figPdfC <- fig.pdfC
+            if (figPdfC != "none")
+              figPdfC <- "interactive"
             
             biosignLs <- x@biosignLs
             
             for (setI in 1:length(biosignLs)) {
               plot(x@biosignLs[[setI]], subC = paste0("[", names(biosignLs)[setI], "]"),
-                   typeC = "tier", ...)
+                   typeC = "tier",
+                   fig.pdfC = figPdfC,
+                   info.txtC = infTxtC,
+                   ...)
               plot(x@biosignLs[[setI]], subC = paste0("[", names(biosignLs)[setI], "]"),
-                   typeC = "boxplot", ...)
+                   typeC = "boxplot",
+                   fig.pdfC = figPdfC,
+                   info.txtC = infTxtC,
+                   ...)
             }
+            
+            if (!(fig.pdfC %in% c("none", "interactive")))
+              dev.off()
+            
+            if (!(info.txtC %in% c("none", "interactive")))
+              sink()
             
           })
 
