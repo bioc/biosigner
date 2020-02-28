@@ -114,16 +114,16 @@ data(diaplasma)
 ```
 
 We attach *diaplasma* to the search path and display a summary of the content of
-the *dataMatrix*, *sampleMetadata* and *variableMetadata* with the `strF`
+the *dataMatrix*, *sampleMetadata* and *variableMetadata* with the `view`
 function from the (imported)
 [ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html) package:
 
 ```{r diaplasma_strF}
 attach(diaplasma)
 library(ropls)
-ropls::strF(dataMatrix)
-ropls::strF(sampleMetadata)
-ropls::strF(variableMetadata)
+ropls::view(dataMatrix)
+ropls::view(sampleMetadata, standardizeL = TRUE)
+ropls::view(variableMetadata, standardizeL = TRUE)
 ```
 
 We see that the **diaplasma** list contains three objects:
@@ -323,17 +323,21 @@ the two data frames can be accessed by the `exprs`, `pData` and `fData`
 respectively (note that the data matrix is stored in the object with samples in
 columns).
 
-The `biosign` method can be applied to an *ExpressionSet* object, by using the
-object as the `x` argument, and by indicating as the `y` argument the name of
-the phenoData column to be used as the response.
+The `biosign` method can be applied to an *ExpressionSet* object, by using the object as the `x` argument, and by indicating as the `y` argument the name of the phenoData column to be used as the response.
 
-In the example below, we will first build a minimal *ExpressionSet* object from
-the *diaplasma* data set, and we subsequently perform signature discovery:
+In the example below, we will first build an *ExpressionSet* object from the *diaplasma* data set, we display its content with the `view` method from the `ropls` package, and we then perform the signature discovery:
 
 ```{r expressionset_code, eval = FALSE, message = FALSE, warning = FALSE}
 library(Biobase)
+
 diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix),
-phenoData = new("AnnotatedDataFrame", data = sampleMetadata))
+                                 phenoData = new("AnnotatedDataFrame",
+                                                 data = sampleMetadata),
+                                 featureData = new("AnnotatedDataFrame",
+                                                 data = variableMetadata))
+
+ropls::view(diaSet)
+
 biosigner::biosign(diaSet, "type", bootI = 5)
 ```
 
@@ -342,6 +346,13 @@ package
 [Biobase](http://bioconductor.org/packages/release/bioc/html/Biobase.html) is
 replaced by the `combine` method from package
 [randomForest](https://cran.r-project.org/web/packages/randomForest/index.html).
+
+The *ExpressionSet* can be displayed 
+
+```{r view_ExpressionSet}
+ropls::view(diaSet)
+```
+
 
 Before moving to new data sets, we detach *diaplasma* from the search path:
 

@@ -9,20 +9,36 @@
 \alias{biosign,matrix-method}
 \title{Builds the molecular signature.}
 \usage{
-\S4method{biosign}{MultiDataSet}(x, y, seedI = NULL,
+\S4method{biosign}{MultiDataSet}(
+  x,
+  y,
+  seedI = NULL,
   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
-  info.txtC = c("none", "interactive", "myfile.txt")[2], ...)
+  info.txtC = c("none", "interactive", "myfile.txt")[2],
+  ...
+)
 
 \S4method{biosign}{ExpressionSet}(x, y, ...)
 
 \S4method{biosign}{data.frame}(x, y, ...)
 
-\S4method{biosign}{matrix}(x, y, methodVc = c("all", "plsda",
-  "randomforest", "svm")[1], bootI = 50, pvalN = 0.05, permI = 1,
-  fixRankL = FALSE, seedI = 123, plotSubC = NA,
+\S4method{biosign}{matrix}(
+  x,
+  y,
+  methodVc = c("all", "plsda", "randomforest", "svm")[1],
+  bootI = 50,
+  pvalN = 0.05,
+  permI = 1,
+  fixRankL = FALSE,
+  seedI = 123,
+  plotSubC = NA,
   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
-  info.txtC = c("none", "interactive", "myfile.txt")[2], printL = TRUE,
-  plotL = TRUE, .sinkC = NULL, ...)
+  info.txtC = c("none", "interactive", "myfile.txt")[2],
+  printL = TRUE,
+  plotL = TRUE,
+  .sinkC = NULL,
+  ...
+)
 }
 \arguments{
 \item{x}{Numerical data frame or matrix (observations x variables), or
