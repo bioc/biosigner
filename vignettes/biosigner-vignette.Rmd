@@ -327,7 +327,7 @@ The `biosign` method can be applied to an *ExpressionSet* object, by using the o
 
 In the example below, we will first build an *ExpressionSet* object from the *diaplasma* data set, we display its content with the `view` method from the `ropls` package, and we then perform the signature discovery:
 
-```{r expressionset_code, eval = FALSE, message = FALSE, warning = FALSE}
+```{r expressionset_code, warning = FALSE, message = FALSE}
 library(Biobase)
 
 diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix),
