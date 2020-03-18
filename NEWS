@@ -1,3 +1,10 @@
+CHANGES IN VERSION 1.14.4
+------------------------------
+
+MINOR MODIFICATION
+
+    o getMset: dots discarded from arguments
+
 CHANGES IN VERSION 1.14.2
 ------------------------------
 
