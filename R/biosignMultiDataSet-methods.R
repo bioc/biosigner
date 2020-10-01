@@ -7,7 +7,6 @@
 #' @aliases getMset getMset, biosignMultiDataSet-method
 #' @param object An S4 object of class \code{biosignMultiDataSet}, created by \code{biosign}
 #' function applied to a MultiDataSet
-#' @param ... Currently not used
 #' @return An S4 object of class \code{MultiDataSet}.
 #' @rdname getMset
 #' @export
