@@ -12,8 +12,6 @@
 \arguments{
 \item{object}{An S4 object of class \code{biosignMultiDataSet}, created by \code{biosign}
 function applied to a MultiDataSet}
-
-\item{...}{Currently not used}
 }
 \value{
 An S4 object of class \code{MultiDataSet}.

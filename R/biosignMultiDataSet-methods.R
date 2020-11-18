@@ -8,8 +8,6 @@
 #' @param object An S4 object of class \code{biosignMultiDataSet}, created by \code{biosign}
 #' function applied to a MultiDataSet
 #' @return An S4 object of class \code{MultiDataSet}.
-#' @rdname getMset
-#' @export
 #' @examples
 #' # Loading the 'NCI60_4arrays' from the 'omicade4' package
 #' data("NCI60_4arrays", package = "omicade4")
@@ -51,6 +49,8 @@
 #' # In the updated MultiDataSet, the updated featureData now contains the cancer_biosign_'classifier' columns
 #' # indicating the selected features
 #' lapply(fData(nciMset), head)
+#' @rdname getMset
+#' @export
 setMethod("getMset", "biosignMultiDataSet",
           function(object) {
             Mset <- MultiDataSet::createMultiDataSet()

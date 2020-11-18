@@ -212,7 +212,6 @@ setMethod("biosign", signature(x = "data.frame"),
 #' restricted to tiers 'S' and 'A' ('xMN') and the labels ('yFc')
 #' @author Philippe Rinaudo and Etienne Thevenot (CEA)
 #' @seealso \code{\link{predict.biosign}}, \code{\link{plot.biosign}}
-#' @rdname biosign
 #' @export
 #' @examples
 #'

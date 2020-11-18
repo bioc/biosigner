@@ -1,8 +1,8 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.19.0
-Date: 2020-10-01
+Version: 1.19.2
+Date: 2020-11-18
 Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
     <etienne.thevenot@cea.fr>
 Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
@@ -41,4 +41,4 @@ License: CeCILL
 LazyLoad: yes
 NeedsCompilation: no
 Packaged: 2016-05-03 10:14:01 UTC; admin-local
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
