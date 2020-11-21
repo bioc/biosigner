@@ -161,7 +161,6 @@ setMethod("biosign", signature(x = "data.frame"),
 #' selected and the corresponding models are built.
 #'
 #' @name biosign
-#' @rdname biosign
 #' @aliases biosign biosign,data.frame-method biosign,matrix-method
 #' biosign,ExpressionSet-method
 #' @docType methods
