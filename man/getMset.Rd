@@ -55,9 +55,9 @@ nciMset <- nciMset[sampleNamesVc[cancerTypeVc \%in\% c("ME", "LE")], ]
 # Summary of the MultiDataSet
 nciMset
 # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
-nciBiosign <- biosigner::biosign(nciMset, "cancer")
-nciMset <- biosigner::getMset(nciBiosign)
+nciBiosign <- biosign(nciMset, "cancer")
+nciMset <- getMset(nciBiosign)
 # In the updated MultiDataSet, the updated featureData now contains the cancer_biosign_'classifier' columns
 # indicating the selected features
-lapply(fData(nciMset), head)
+lapply(Biobase::fData(nciMset), head)
 }

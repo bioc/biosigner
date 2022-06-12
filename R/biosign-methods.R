@@ -1,295 +1,7 @@
-#### biosign (MultiDataSet) ####
-
-#' @rdname biosign
-#' @export
-setMethod("biosign", signature(x = "MultiDataSet"),
-          function(x,
-                   y,
-                   seedI = NULL,
-                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
-                   info.txtC = c("none", "interactive", "myfile.txt")[2],
-                   ...) {
-            
-            if (!(info.txtC %in% c("none", "interactive")))
-              sink(info.txtC, append = TRUE)
-            
-            infTxtC <- info.txtC
-            if (infTxtC != "none")
-              infTxtC <- "interactive"
-            
-            if (!(fig.pdfC %in% c("none", "interactive")))
-              grDevices::pdf(fig.pdfC)
-            
-            figPdfC <- fig.pdfC
-            if (figPdfC != "none")
-              figPdfC <- "none"
-            
-            biosignMsetLs <- vector(mode = "list",
-                                    length = length(names(x)))
-            names(biosignMsetLs) <- names(x)
-            
-            for (setC in names(x)) {
-              
-              if (info.txtC != "none")
-                cat("\n\nSelecting the features for the '", setC, "' dataset:\n", sep = "")
-              
-              plotL <- TRUE
-              
-              setBiosign <- tryCatch(biosigner::biosign(x[[setC]],
-                                                        y = y,
-                                                        fig.pdfC = figPdfC,
-                                                        info.txtC = infTxtC,
-                                                        ...),
-                                     error = function(e) NULL)
-              
-              if (is.null(setBiosign)) {
-                
-                setBiosign <- new("biosign")
-                setBiosign@eset <- x[[setC]]
-                plotL <- FALSE
-                
-              } else {
-                
-                tierMC <- setBiosign@tierMC
-                
-                if (is.null(tierMC) ||
-                    sum(apply(setBiosign@tierMC, 2,
-                              function(colVc) sum(colVc == "S"))) < 1)
-                  plotL <- FALSE
-                
-              }
-              
-              biosignMsetLs[[setC]] <- setBiosign
-              
-              if (fig.pdfC != "none" && plotL) {
-                
-                plot(setBiosign,
-                     typeC = "tier",
-                     plotSubC = paste0("[", setC, "]"),
-                     ...)
-                
-                plot(setBiosign,
-                     typeC = "boxplot",
-                     plotSubC = paste0("[", setC, "]"),
-                     ...)
-                
-              }
-              
-            }
-            
-            if (!(fig.pdfC %in% c("none", "interactive")))
-              grDevices::dev.off()
-            
-            if (!(info.txtC %in% c("none", "interactive")))
-              sink()
-            
-            biosignMset <- new("biosignMultiDataSet")
-            biosignMset@biosignLs <- biosignMsetLs
-            
-            return(invisible(biosignMset))
-            
-          })
-
-
-#### biosign (ExpressionSet) ####
-
-#' @rdname biosign
-#' @export
-setMethod("biosign", signature(x = "ExpressionSet"),
-          function(x, y, ...) {
-            
-            if (!(y %in% colnames(Biobase::pData(x)))) {
-              stop("'y' must be the name of a column of the phenoData slot of the 'ExpressionSet' object", call. = FALSE)
-            } else {
-              rspFcVc <- Biobase::pData(x)[, y]
-              bsg <- biosign(t(Biobase::exprs(x)), rspFcVc, ...)
-            }
-            
-            tierMC <- bsg@tierMC
-            
-            fdaDF <- Biobase::fData(x)
-            
-            if (!is.null(tierMC)) {
-              
-              for (colI in 1:ncol(tierMC)) {
-                
-                tierVc <- ropls:::.genVec(x, "feature", "character")
-                
-                tierVc[rownames(tierMC)] <- tierMC[, colI]
-                
-                fdaDF[, paste(y,
-                              "biosign",
-                              gsub("randomforest", "forest", colnames(tierMC)[colI]),
-                              sep = "_")] <- tierVc
-                
-              }
-              
-            }
-            
-            Biobase::fData(x) <- fdaDF
-            
-            bsg@eset <- x
-            
-            return(invisible(bsg))
-            
-          })
-
-
-#### biosign (data.frame) ####
-
-#' @rdname biosign
-#' @export
-setMethod("biosign", signature(x = "data.frame"),
-          function(x, y, ...) {
-            if (!all(sapply(x, data.class) == "numeric")) {
-              stop("'x' data frame must contain columns of 'numeric' vectors only", call. = FALSE)
-            } else
-              x <- as.matrix(x)
-            bsg <- biosign(x, y, ...)
-            
-            return(invisible(bsg))
-            
-          })
-
-
 ####    biosign (matrix)   ####
 
-#' Builds the molecular signature.
-#'
-#' Main function of the 'biosigner' package. For each of the available
-#' classifiers (PLS-DA, Random Forest, and SVM), the significant features are
-#' selected and the corresponding models are built.
-#'
-#' @name biosign
 #' @rdname biosign
-#' @aliases biosign biosign,data.frame-method biosign,matrix-method
-#' biosign,ExpressionSet-method
-#' @docType methods
-#' @param x Numerical data frame or matrix (observations x variables), or
-#' ExpressionSet object with non empty assayData and phenoData; NAs are allowed
-#' for PLS-DA but for SVM, samples with NA will be removed
-#' @param y Two-level factor corresponding to the class labels, or a character
-#' indicating the name of the column of the pData to be used, when x is an
-#' ExpressionSet object
-#' @param methodVc Character vector: Either one or all of the following
-#' classifiers: Partial Least Squares Discriminant Analysis ('plsda'), or
-#' Random Forest ('randomforest'), or Support Vector Machine ('svm')
-#' @param bootI Integer: Number of bootstaps for resampling
-#' @param pvalN Numeric: To speed up the selection, only variables which
-#' significantly improve the model up to two times this threshold (to take into
-#' account potential fluctuations) are computed
-#' @param permI Integer: Random permutation are used to assess the significance
-#' of each new variable included into the model (forward selection)
-#' @param fixRankL Logical: Should the initial ranking be computed with the
-#' full model only, or as the median of the ranks from the models built on the
-#' sampled dataset?
-#' @param seedI integer: optional seed to obtain exactly the same signature when
-#' rerunning biosigner; default is '123'; set to NULL to prevent seed setting
-#' @param plotSubC Character: Graphic subtitle
-#' @param fig.pdfC Character: File name with '.pdf' extension for the figure;
-#' if 'interactive' (default), figures will be displayed interactively; if 'none',
-#' no figure will be generated
-#' @param info.txtC Character: File name with '.txt' extension for the printed
-#' results (call to sink()'); if 'interactive' (default), messages will be
-#' printed on the screen; if 'none', no verbose will be generated
-#' @param printL Logical: deprecated: use the 'info.txtC' argument instead
-#' @param plotL Logical: deprecated: use the 'fig.pdfC' argument instead
-#' @param .sinkC Character: deprecated: use the 'info.txtC' argument instead
-#' @param ... Currently not used.
-#' @return An S4 object of class 'biosign' containing the following slots: 1)
-#' 'methodVc' character vector: selected classifier(s) ('plsda',
-#' 'randomforest', and/or 'svm'), 2) 'accuracyMN' numeric matrix: balanced
-#' accuracies for the full models, and the models restricted to the 'S' and
-#' 'AS' signatures (predictions are obtained by using the resampling scheme
-#' selected with the 'bootI' and 'crossvalI' arguments), 3) 'tierMC' character
-#' matrix: contains the tier ('S', 'A', 'B', 'C', 'D', or 'E') of each feature
-#' for each classifier (features with tier 'S' have been found significant in
-#' all backward selections; features with tier 'A' have been found significant
-#' in all but the last selection, and so on), 4) modelLs list: selected
-#' classifier(s) trained on the subset restricted to the 'S' features, 5)
-#' signatureLs list: 'S' signatures for each classifier; and 6) 'AS' list: 'AS'
-#' signatures and corresponding trained classifiers, in addition to the dataset
-#' restricted to tiers 'S' and 'A' ('xMN') and the labels ('yFc')
-#' @author Philippe Rinaudo and Etienne Thevenot (CEA)
-#' @seealso \code{\link{predict.biosign}}, \code{\link{plot.biosign}}
 #' @export
-#' @examples
-#'
-#' ## loading the diaplasma dataset
-#'
-#' data(diaplasma)
-#' attach(diaplasma)
-#'
-#' ## restricting to a smaller dataset for this example
-#'
-#' featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
-#' dataMatrix <- dataMatrix[, featureSelVl]
-#' variableMetadata <- variableMetadata[featureSelVl, ]
-#'
-#' # signature selection for all 3 classifiers
-#' # a bootI = 5 number of bootstraps is used for this example
-#' # we recommend to keep the default bootI = 50 value for your analyzes
-#'
-#' diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
-#'
-#' ## Application to an ExpressionSet
-#' 
-#' diaSet <- ExpressionSet(assayData = t(dataMatrix), 
-#'                         phenoData = new("AnnotatedDataFrame", 
-#'                                         data = sampleMetadata), 
-#'                         featureData = new("AnnotatedDataFrame", 
-#'                                           data = variableMetadata),
-#'                         experimentData = new("MIAME", 
-#'                                              title = "diaplasma"))
-#'                                              
-#' diaSign <- biosign(diaSet, "type", bootI = 5)
-#' diaSet <- getEset(diaSign)
-#' head(fData(diaSet))
-#' 
-#' detach(diaplasma)
-#' 
-#' ## Application to a MultiDataSet
-#' 
-#' # Loading the 'NCI60_4arrays' from the 'omicade4' package
-#' data("NCI60_4arrays", package = "omicade4")
-#' # Selecting two of the four datasets
-#' setNamesVc <- c("agilent", "hgu95")
-#' # Creating the MultiDataSet instance
-#' nciMset <- MultiDataSet::createMultiDataSet()
-#' # Adding the two datasets as ExpressionSet instances
-#' for (setC in setNamesVc) {
-#'   # Getting the data
-#'   exprMN <- as.matrix(NCI60_4arrays[[setC]])
-#'   pdataDF <- data.frame(row.names = colnames(exprMN),
-#'                         cancer = substr(colnames(exprMN), 1, 2),
-#'                         stringsAsFactors = FALSE)
-#'   fdataDF <- data.frame(row.names = rownames(exprMN),
-#'                         name = rownames(exprMN),
-#'                         stringsAsFactors = FALSE)
-#'   # Building the ExpressionSet
-#'   eset <- Biobase::ExpressionSet(assayData = exprMN,
-#'                                  phenoData = new("AnnotatedDataFrame",
-#'                                                  data = pdataDF),
-#'                                  featureData = new("AnnotatedDataFrame",
-#'                                                    data = fdataDF),
-#'                                  experimentData = new("MIAME",
-#'                                                       title = setC))
-#'   # Adding to the MultiDataSet
-#'   nciMset <- MultiDataSet::add_eset(nciMset, eset, dataset.type = setC,
-#'                                     GRanges = NA, warnings = FALSE)
-#' }
-#' # Restricting to the 'ME' and 'LE' cancer types
-#' sampleNamesVc <- Biobase::sampleNames(nciMset[["agilent"]])
-#' cancerTypeVc <- Biobase::pData(nciMset[["agilent"]])[, "cancer"]
-#' nciMset <- nciMset[sampleNamesVc[cancerTypeVc %in% c("ME", "LE")], ]
-#' # Summary of the MultiDataSet
-#' nciMset
-#' # Building PLS-DA models for the cancer type, and getting back the updated MultiDataSet
-#' nciPlsda <- ropls::opls(nciMset, "cancer", predI = 2)
-#' nciMset <- ropls::getMset(nciPlsda)
-#' # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
-#' nciBiosign <- biosigner::biosign(nciMset, "cancer")
-#' nciMset <- biosigner::getMset(nciBiosign)
 setMethod("biosign", signature(x = "matrix"),
           function(x,
                    y,
@@ -301,57 +13,10 @@ setMethod("biosign", signature(x = "matrix"),
                    fixRankL = FALSE,
                    
                    seedI = 123,
-                   plotSubC = NA,
+                   plotSubC = "",
                    fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
-                   info.txtC = c("none", "interactive", "myfile.txt")[2],                   
-                   
-                   printL = TRUE,
-                   plotL = TRUE,
-                   .sinkC = NULL,
-                   ...) {
-            
-            if (!printL) {
-              warning("'printL' argument is deprecated; use 'info.txtC' instead.",
-                      call. = FALSE)
-              info.txtC <- "none"
-            }
-            
-            if (!plotL) {
-              warning("'plotL' argument is deprecated; use 'fig.pdfC' instead.",
-                      call. = FALSE)
-              fig.pdfC <- "none"
-            }
-            
-            if (!is.null(.sinkC)) {
-              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead.",
-                      call. = FALSE)
-              info.txtC <- .sinkC
-            }
-            
-            if (is.null(info.txtC)) {
-              warning("'info.txtC = NULL' argument value is deprecated; use 'info.txtC = 'none'' instead.",
-                      call. = FALSE)
-              info.txtC <- 'none'
-            }
-            
-            if (is.na(info.txtC)) {
-              warning("'info.txtC = NA' argument value is deprecated; use 'info.txtC = 'interactive'' instead.",
-                      call. = FALSE)
-              info.txtC <- 'interactive'
-            }
-            
-            if (is.null(fig.pdfC)) {
-              warning("'fig.pdfC = NULL' argument value is deprecated; use 'fig.pdfC = 'none'' instead.",
-                      call. = FALSE)
-              fig.pdfC <- 'none'
-            }
-            
-            if (is.na(fig.pdfC)) {
-              warning("'fig.pdfC = NA' argument value is deprecated; use 'fig.pdfC = 'interactive'' instead.",
-                      call. = FALSE)
-              fig.pdfC <- 'interactive'
-            }
-            
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+           
             if (!(info.txtC %in% c("none", "interactive")))
               sink(info.txtC, append = TRUE)
             
@@ -424,6 +89,9 @@ setMethod("biosign", signature(x = "matrix"),
             names(stopIterVl) <- names(accuVn) <- methodVc
             
             for (methodC in methodVc) {
+              
+              if (info.txtC != "none")
+                cat("Selecting features for the ", methodC, " model\n", sep = "")
               
               if (!is.null(seedI))
                 set.seed(seedI)
@@ -652,6 +320,543 @@ setMethod("biosign", signature(x = "matrix"),
             
           })
 
+
+#### biosign (data.frame) ####
+
+#' @rdname biosign
+#' @export
+setMethod("biosign", signature(x = "data.frame"),
+          function(x,
+                   y,
+                   methodVc = c("all", "plsda", "randomforest", "svm")[1],
+                   bootI = 50,
+                   pvalN = 0.05,
+                   
+                   permI = 1,
+                   fixRankL = FALSE,
+                   
+                   seedI = 123,
+                   plotSubC = "",
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+            
+            if (!all(sapply(x, data.class) == "numeric")) {
+              stop("'x' data frame must contain columns of 'numeric' vectors only", call. = FALSE)
+            } else
+              x <- as.matrix(x)
+            
+            bsg <- biosign(x = x,
+                           y = y,
+                           methodVc = methodVc,
+                           bootI = bootI,
+                           pvalN = pvalN,
+                           
+                           permI = permI,
+                           fixRankL = fixRankL,
+                           
+                           seedI = seedI,
+                           plotSubC = plotSubC,
+                           fig.pdfC = fig.pdfC,                   
+                           info.txtC = info.txtC)
+            
+            return(invisible(bsg))
+            
+          })
+
+
+#### biosign (SummarizedExperiment) ####
+
+#' @rdname biosign
+#' @export
+setMethod("biosign", signature(x = "SummarizedExperiment"),
+          function(x,
+                   y,
+                   methodVc = c("all", "plsda", "randomforest", "svm")[1],
+                   bootI = 50,
+                   pvalN = 0.05,
+                   
+                   permI = 1,
+                   fixRankL = FALSE,
+                   
+                   seedI = 123,
+                   plotSubC = "",
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+            
+            if (length(y) == 1 && is.character(y)) {
+              
+              if (!(y %in% colnames(SummarizedExperiment::colData(x))))
+                stop("'y' must be the name of a column of the colData slot of the 'SummarizedExperiment' object")
+              
+              bsg <- biosign(x = t(SummarizedExperiment::assay(x)),
+                             y = SummarizedExperiment::colData(x)[, y],
+                             methodVc = methodVc,
+                             bootI = bootI,
+                             pvalN = pvalN,
+                             
+                             permI = permI,
+                             fixRankL = fixRankL,
+                             
+                             seedI = seedI,
+                             plotSubC = plotSubC,
+                             fig.pdfC = fig.pdfC,                   
+                             info.txtC = info.txtC)
+              
+              y_name.c <- y
+              
+            } else if (is.list(y)) { # this mode is only used internally for MultiAssayExperiment
+              
+              stopifnot(length(y) == 1)
+              stopifnot(!is.null(names(y)))
+              
+              bsg <- biosign(x = t(SummarizedExperiment::assay(x)),
+                             y = y[[1]],
+                             methodVc = methodVc,
+                             bootI = bootI,
+                             pvalN = pvalN,
+                             
+                             permI = permI,
+                             fixRankL = fixRankL,
+                             
+                             seedI = seedI,
+                             plotSubC = plotSubC,
+                             fig.pdfC = fig.pdfC,                   
+                             info.txtC = info.txtC)
+              
+              y_name.c <- names(y)
+              
+            } else
+              stop("'y' must be the name of a column of the colData slot of the 'SummarizedExperiment' object")
+        
+            method.vc <- methodVc
+            if (length(methodVc) == 1 && methodVc == "all")
+              method.vc <- c("plsda", "forest", "svm")
+            
+            x@metadata[["biosign"]][[paste0(make.names(y_name.c),
+                                            "_",
+                                            paste(gsub("randomforest", "forest", method.vc),
+                                                  collapse = "."))]] <- bsg
+            
+            if (!all(is.na(bsg@accuracyMN["S", ]))) {
+              
+              tierMC <- bsg@tierMC
+              
+              fdaDF <- SummarizedExperiment::rowData(x)
+              
+              for (colI in 1:ncol(tierMC)) {
+                
+                tierVc <- ropls:::.genVec(x, "feature", "character")
+                
+                tierVc[rownames(tierMC)] <- tierMC[, colI]
+                
+                fdaDF[, paste(make.names(y_name.c),
+                              "biosign",
+                              gsub("randomforest", "forest", colnames(tierMC)[colI]),
+                              sep = "_")] <- tierVc
+                
+              }
+              
+              SummarizedExperiment::rowData(x) <- fdaDF
+              
+            }
+            
+            return(invisible(x))
+            
+          })
+
+#### biosign (MultiAssayExperiment) ####
+
+#' @rdname biosign
+#' @export
+setMethod("biosign", signature(x = "MultiAssayExperiment"),
+          function(x,
+                   y,
+                   methodVc = c("all", "plsda", "randomforest", "svm")[1],
+                   bootI = 50,
+                   pvalN = 0.05,
+                   
+                   permI = 1,
+                   fixRankL = FALSE,
+                   
+                   seedI = 123,
+                   plotSubC = "",
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+            
+            if (!is.character(y))
+              stop("'y' must be a character when the 'biosign' method is applied to an 'MultiAssayExperiment' instance")
+            
+            
+            if (!(info.txtC %in% c("none", "interactive")))
+              sink(info.txtC, append = TRUE)
+            
+            infTxtC <- info.txtC
+            if (infTxtC != "none")
+              infTxtC <- "interactive"
+            
+            if (!(fig.pdfC %in% c("none", "interactive")))
+              grDevices::pdf(fig.pdfC)
+            
+            figPdfC <- fig.pdfC
+            if (figPdfC != "none")
+              figPdfC <- "none"
+            
+            if (!(y %in% colnames(MultiAssayExperiment::colData(x)))) {
+              stop("'y' must be the name of a column for the colData of the MultiAssayExperiment instance")
+            } else {
+              colData.DF <- MultiAssayExperiment::colData(x)
+              y.fcvcn <- colData.DF[, y]
+              names(y.fcvcn) <- rownames(colData.DF)
+              method.vc <- methodVc
+              if (length(methodVc) == 1 && methodVc == "all")
+                method.vc <- c("plsda", "forest", "svm")
+              type.c <- paste0(make.names(y), "_", paste(gsub("randomforest", "forest", method.vc), collapse = "."))
+            }
+            
+            for (setC in names(x)) {
+              
+              if (info.txtC != "none")
+                cat("\n\nSelecting the features for the '", setC, "' dataset:\n", sep = "")
+              
+              plotL <- TRUE
+              
+              set.se <- x[[setC]]
+              
+              y_set.fcvcn <- y.fcvcn[colnames(set.se)]
+              
+              y_set.ls <- list(y_set.fcvcn)
+              names(y_set.ls) <- y
+              
+              set.se <- biosign(set.se,
+                                y = y_set.ls,
+                                methodVc = methodVc,
+                                bootI = bootI,
+                                pvalN = pvalN,
+                                
+                                permI = permI,
+                                fixRankL = fixRankL,
+                                
+                                seedI = seedI,
+                                plotSubC = plotSubC,
+                                fig.pdfC = figPdfC,                   
+                                info.txtC = infTxtC)
+              
+              set.biosign <- getBiosign(set.se)[[type.c]]
+              
+              if (all(is.na(set.biosign@accuracyMN["S", ]))) {
+                
+                plotL <- FALSE
+                
+              }
+              
+              if (fig.pdfC != "none" && plotL) {
+                
+                plot(x = set.biosign,
+                     y = y,
+                     typeC = "tier",
+                     
+                     plotSubC = paste0("[", setC, "]"),                  
+                     fig.pdfC = fig.pdfC,
+                     info.txtC = info.txtC)
+                
+                plot(x = set.biosign,
+                     y = y,
+                     typeC = "boxplot",
+                     
+                     plotSubC = paste0("[", setC, "]"),                  
+                     fig.pdfC = fig.pdfC,
+                     info.txtC = info.txtC)
+                
+              }
+              
+              x[[setC]] <- set.se
+              
+            }
+            
+            if (!(fig.pdfC %in% c("none", "interactive")))
+              grDevices::dev.off()
+            
+            if (!(info.txtC %in% c("none", "interactive")))
+              sink()
+            
+            return(invisible(x))
+            
+          })
+
+
+#### biosign (ExpressionSet) ####
+
+#' @rdname biosign
+#' @export
+setMethod("biosign", signature(x = "ExpressionSet"),
+          function(x,
+                   y,
+                   methodVc = c("all", "plsda", "randomforest", "svm")[1],
+                   bootI = 50,
+                   pvalN = 0.05,
+                   
+                   permI = 1,
+                   fixRankL = FALSE,
+                   
+                   seedI = 123,
+                   plotSubC = "",
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+            
+            if (!(y %in% colnames(Biobase::pData(x)))) {
+              stop("'y' must be the name of a column of the phenoData slot of the 'ExpressionSet' object", call. = FALSE)
+            } else {
+              rspFcVc <- Biobase::pData(x)[, y]
+              bsg <- biosign(x = t(Biobase::exprs(x)),
+                             y = rspFcVc,
+                             methodVc = methodVc,
+                             bootI = bootI,
+                             pvalN = pvalN,
+                             
+                             permI = permI,
+                             fixRankL = fixRankL,
+                             
+                             seedI = seedI,
+                             plotSubC = plotSubC,
+                             fig.pdfC = fig.pdfC,                   
+                             info.txtC = info.txtC)
+            }
+            
+            tierMC <- bsg@tierMC
+            
+            fdaDF <- Biobase::fData(x)
+            
+            if (!is.null(tierMC)) {
+              
+              for (colI in 1:ncol(tierMC)) {
+                
+                tierVc <- ropls:::.genVec(x, "feature", "character")
+                
+                tierVc[rownames(tierMC)] <- tierMC[, colI]
+                
+                fdaDF[, paste(y,
+                              "biosign",
+                              gsub("randomforest", "forest", colnames(tierMC)[colI]),
+                              sep = "_")] <- tierVc
+                
+              }
+              
+            }
+            
+            Biobase::fData(x) <- fdaDF
+            
+            bsg@eset <- x
+            
+            return(invisible(bsg))
+            
+          })
+
+
+#### biosign (MultiDataSet) ####
+
+#' @rdname biosign
+#' @export
+setMethod("biosign", signature(x = "MultiDataSet"),
+          function(x,
+                   y,
+                   methodVc = c("all", "plsda", "randomforest", "svm")[1],
+                   bootI = 50,
+                   pvalN = 0.05,
+                   
+                   permI = 1,
+                   fixRankL = FALSE,
+                   
+                   seedI = 123,
+                   plotSubC = "",
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],                   
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+            
+            if (!(info.txtC %in% c("none", "interactive")))
+              sink(info.txtC, append = TRUE)
+            
+            infTxtC <- info.txtC
+            if (infTxtC != "none")
+              infTxtC <- "interactive"
+            
+            if (!(fig.pdfC %in% c("none", "interactive")))
+              grDevices::pdf(fig.pdfC)
+            
+            figPdfC <- fig.pdfC
+            if (figPdfC != "none")
+              figPdfC <- "none"
+            
+            biosignMsetLs <- vector(mode = "list",
+                                    length = length(names(x)))
+            names(biosignMsetLs) <- names(x)
+            
+            for (setC in names(x)) {
+              
+              if (info.txtC != "none")
+                cat("\n\nSelecting the features for the '", setC, "' dataset:\n", sep = "")
+              
+              plotL <- TRUE
+              
+              setBiosign <- tryCatch(biosigner::biosign(x = x[[setC]],
+                                                        y = y,
+                                                        methodVc = methodVc,
+                                                        bootI = bootI,
+                                                        pvalN = pvalN,
+                                                        
+                                                        permI = permI,
+                                                        fixRankL = fixRankL,
+                                                        
+                                                        seedI = seedI,
+                                                        plotSubC = plotSubC,
+                                                        fig.pdfC = figPdfC,                   
+                                                        info.txtC = infTxtC),
+                                     error = function(e) NULL)
+              
+              if (all(is.na(setBiosign@accuracyMN["S", ]))) {
+                
+                setBiosign <- new("biosign")
+                setBiosign@eset <- x[[setC]]
+                plotL <- FALSE
+                
+              } else {
+                
+                tierMC <- setBiosign@tierMC
+                
+                if (is.null(tierMC) ||
+                    sum(apply(setBiosign@tierMC, 2,
+                              function(colVc) sum(colVc == "S"))) < 1)
+                  plotL <- FALSE
+                
+              }
+              
+              biosignMsetLs[[setC]] <- setBiosign
+              
+              if (fig.pdfC != "none" && plotL) {
+                
+                plot(x = setBiosign,
+                     y = y,
+                     typeC = "tier",
+                     
+                     plotSubC = paste0("[", setC, "]"),                  
+                     fig.pdfC = fig.pdfC,
+                     info.txtC = info.txtC)
+                
+                plot(x = setBiosign,
+                     y = y,
+                     typeC = "boxplot",
+                     
+                     plotSubC = paste0("[", setC, "]"),                  
+                     fig.pdfC = fig.pdfC,
+                     info.txtC = info.txtC)
+                
+              }
+              
+            }
+            
+            if (!(fig.pdfC %in% c("none", "interactive")))
+              grDevices::dev.off()
+            
+            if (!(info.txtC %in% c("none", "interactive")))
+              sink()
+            
+            biosignMset <- new("biosignMultiDataSet")
+            biosignMset@biosignLs <- biosignMsetLs
+            
+            return(invisible(biosignMset))
+            
+          })
+
+
+####     getAccuracyMN    ####
+
+#' @rdname getAccuracyMN
+#' @export
+setMethod("getAccuracyMN", "biosign",
+          function(object) {
+            return(object@accuracyMN)
+          })
+
+
+#### getBiosign (SummarizedExperiment) ####
+
+#' @rdname getBiosign
+#' @export
+setMethod("getBiosign", "SummarizedExperiment",
+          function(object) {
+            return(object@metadata[["biosign"]])
+          })
+
+
+####    getEset    ####
+
+#' getEset method
+#'
+#' Extracts the complemented ExpressionSet when biosign has been applied to an ExpressionSet
+#'
+#' @aliases getEset getEset, biosign-method
+#' @param object An S4 object of class \code{biosign}, created by \code{biosign}
+#' function.
+#' @return An S4 object of class \code{ExpressionSet} which contains the dataMatrix (t(exprs(eset))),
+#' and the sampleMetadata (pData(eset)) and variableMetadata (fData(eset)) with the additional columns
+#' containing the computed tiers for each feature and each classifier.
+#' @author Etienne Thevenot, \email{etienne.thevenot@@cea.fr}
+#' @examples
+#' 
+#' ## loading the diaplasma dataset
+#'
+#' data(diaplasma)
+#' attach(diaplasma)
+#' 
+#' ## building the ExpresssionSet instance
+#' 
+#' diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix), 
+#'                                  phenoData = new("AnnotatedDataFrame", 
+#'                                                  data = sampleMetadata), 
+#'                                  featureData = new("AnnotatedDataFrame", 
+#'                                                    data = variableMetadata),
+#'                                  experimentData = new("MIAME", 
+#'                                                       title = "diaplasma"))
+#'
+#' ## restricting to a smaller dataset for this example
+#'
+#' featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
+#' diaSet <- diaSet[featureSelVl, ]
+#'
+#' ## signature selection for all 3 classifiers
+#' ## a bootI = 5 number of bootstraps is used for this example
+#' ## we recommend to keep the default bootI = 50 value for your analyzes
+#'
+#' set.seed(123)
+#' diaSign <- biosign(diaSet, "type", bootI = 5)
+#' 
+#' diaSet <- biosigner::getEset(diaSign)
+#' head(Biobase::pData(diaSet))
+#' head(Biobase::fData(diaSet))
+#' 
+#' detach(diaplasma)
+#'
+#' @rdname getEset
+#' @export
+setMethod("getEset", "biosign",
+          function(object) {
+            return(object@eset)
+          })
+
+
+####    getSignatureLs    ####
+
+#' @rdname getSignatureLs
+#' @export
+setMethod("getSignatureLs", "biosign",
+          function(object, tierC = c("S", "AS")[1]) {
+            if(tierC == "S") {
+              return(object@signatureLs)
+            } else if(tierC == "AS") {
+              return(object@AS$signatureLs)
+            } else
+              stop("'tierC' argument must be either 'S' or 'AS'")
+          })
+
+
 ####    predict    ####
 
 #' Predict method for 'biosign' signature objects
@@ -668,7 +873,6 @@ setMethod("biosign", signature(x = "matrix"),
 #' 'biosign'.
 #' @param tierMaxC Character: Maximum level of tiers to display: Either 'S'or
 #' 'A'.
-#' @param ... Currently not used.
 #' @return Data frame with the predictions for each classifier as factor
 #' columns.
 #' @author Philippe Rinaudo and Etienne Thevenot (CEA)
@@ -715,7 +919,7 @@ setMethod("biosign", signature(x = "matrix"),
 #' @rdname predict
 #' @export
 setMethod("predict", signature(object = "biosign"),
-          function(object, newdata, tierMaxC = "S", ...)
+          function(object, newdata, tierMaxC = "S")
           {
             
             if (any(!(tierMaxC %in% c("S", "A"))))
@@ -889,163 +1093,6 @@ setMethod("show",
           })
 
 
-####    getEset    ####
-
-#' getEset method
-#'
-#' Extracts the complemented ExpressionSet when biosign has been applied to an ExpressionSet
-#'
-#' @aliases getEset getEset, biosign-method
-#' @param object An S4 object of class \code{biosign}, created by \code{biosign}
-#' function.
-#' @return An S4 object of class \code{ExpressionSet} which contains the dataMatrix (t(exprs(eset))),
-#' and the sampleMetadata (pData(eset)) and variableMetadata (fData(eset)) with the additional columns
-#' containing the computed tiers for each feature and each classifier.
-#' @author Etienne Thevenot, \email{etienne.thevenot@@cea.fr}
-#' @examples
-#' 
-#' ## loading the diaplasma dataset
-#'
-#' data(diaplasma)
-#' attach(diaplasma)
-#' 
-#' ## building the ExpresssionSet instance
-#' 
-#' diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix), 
-#'                                  phenoData = new("AnnotatedDataFrame", 
-#'                                                  data = sampleMetadata), 
-#'                                  featureData = new("AnnotatedDataFrame", 
-#'                                                    data = variableMetadata),
-#'                                  experimentData = new("MIAME", 
-#'                                                       title = "diaplasma"))
-#'
-#' ## restricting to a smaller dataset for this example
-#'
-#' featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
-#' diaSet <- diaSet[featureSelVl, ]
-#'
-#' ## signature selection for all 3 classifiers
-#' ## a bootI = 5 number of bootstraps is used for this example
-#' ## we recommend to keep the default bootI = 50 value for your analyzes
-#'
-#' set.seed(123)
-#' diaSign <- biosign(diaSet, "type", bootI = 5)
-#' 
-#' diaSet <- biosigner::getEset(diaSign)
-#' head(Biobase::pData(diaSet))
-#' head(Biobase::fData(diaSet))
-#' 
-#' detach(diaplasma)
-#'
-#' @rdname getEset
-#' @export
-setMethod("getEset", "biosign",
-          function(object) {
-            return(object@eset)
-          })
-
-
-####     getAccuracyMN    ####
-
-#' Accuracies of the full model and the models restricted to the signatures
-#'
-#' Balanced accuracies for the full models, and the models restricted to the
-#' 'S' and 'AS' signatures
-#'
-#' @aliases getAccuracyMN getAccuracyMN,biosign-method
-#' @param object An S4 object of class \code{biosign}, created by the
-#' \code{biosign} function.
-#' @param ... Currently not used.
-#' @return A numeric matrix containing the balanced accuracies for the full
-#' models, and the models restricted to the 'S' and 'AS' signatures
-#' (predictions are obtained by using the resampling scheme selected with the
-#' 'bootI' and 'crossvalI' arguments)
-#' @author Philippe Rinaudo and Etienne Thevenot (CEA)
-#' @examples
-#'
-#' ## loading the diaplasma dataset
-#'
-#' data(diaplasma)
-#' attach(diaplasma)
-#'
-#' ## restricting to a smaller dataset for this example
-#'
-#' featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
-#' dataMatrix <- dataMatrix[, featureSelVl]
-#' variableMetadata <- variableMetadata[featureSelVl, ]
-#'
-#' ## signature selection for all 3 classifiers
-#' ## a bootI = 5 number of bootstraps is used for this example
-#' ## we recommend to keep the default bootI = 50 value for your analyzes
-#'
-#' set.seed(123)
-#' diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
-#'
-#' ## individual boxplot of the selected signatures
-#'
-#' getAccuracyMN(diaSign)
-#' 
-#' detach(diaplasma)
-#'
-#' @rdname getAccuracyMN
-#' @export
-setMethod("getAccuracyMN", "biosign",
-          function(object) {
-            return(object@accuracyMN)
-          })
-
-
-####    getSignatureLs    ####
-
-#' Signatures selected by the models
-#'
-#' List of 'S' (or 'S' and 'A') signatures for each classifier
-#'
-#' @aliases getSignatureLs getSignatureLs,biosign-method
-#' @param object An S4 object of class \code{biosign}, created by the
-#' \code{biosign} function.
-#' @param tierC Character: defines whether signatures from the 'S' tier only
-#' (default) or the ('S' and 'A') tiers should be returned
-#' @param ... Currently not used.
-#' @return List of 'S' (or 'S' and 'A') signatures for each classifier
-#' @author Philippe Rinaudo and Etienne Thevenot (CEA)
-#' @examples
-#'
-#' ## loading the diaplasma dataset
-#'
-#' data(diaplasma)
-#' attach(diaplasma)
-#'
-#' ## restricting to a smaller dataset for this example
-#'
-#' featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
-#' dataMatrix <- dataMatrix[, featureSelVl]
-#' variableMetadata <- variableMetadata[featureSelVl, ]
-#'
-#' ## signature selection for all 3 classifiers
-#' ## a bootI = 5 number of bootstraps is used for this example
-#' ## we recommend to keep the default bootI = 50 value for your analyzes
-#'
-#' set.seed(123)
-#' diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
-#'
-#' ## individual boxplot of the selected signatures
-#'
-#' getSignatureLs(diaSign)
-#'
-#' detach(diaplasma)
-#'
-#' @rdname getSignatureLs
-#' @export
-setMethod("getSignatureLs", "biosign",
-          function(object, tierC = c("S", "AS")[1]) {
-            if(tierC == "S") {
-              return(object@signatureLs)
-            } else if(tierC == "AS") {
-              return(object@AS$signatureLs)
-            } else
-              stop("'tierC' argument must be either 'S' or 'AS'")
-          })
 
 
 

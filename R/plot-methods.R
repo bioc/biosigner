@@ -1,97 +1,3 @@
-####    plot  (biosignMultiDataSet)  ####
-
-#' Plot method for biosign signatures
-#'
-#' This function plots signatures obtained by \code{biosign}.
-#'
-#' @aliases plot.biosignMultiDataSet plot,biosignMultiDataSet-method
-#' @examples
-#' # Loading the 'NCI60_4arrays' from the 'omicade4' package
-#' data("NCI60_4arrays", package = "omicade4")
-#' # Selecting two of the four datasets
-#' setNamesVc <- c("agilent", "hgu95")
-#' # Creating the MultiDataSet instance
-#' nciMset <- MultiDataSet::createMultiDataSet()
-#' # Adding the two datasets as ExpressionSet instances
-#' for (setC in setNamesVc) {
-#'   # Getting the data
-#'   exprMN <- as.matrix(NCI60_4arrays[[setC]])
-#'   pdataDF <- data.frame(row.names = colnames(exprMN),
-#'                         cancer = substr(colnames(exprMN), 1, 2),
-#'                         stringsAsFactors = FALSE)
-#'   fdataDF <- data.frame(row.names = rownames(exprMN),
-#'                         name = rownames(exprMN),
-#'                         stringsAsFactors = FALSE)
-#'   # Building the ExpressionSet
-#'   eset <- Biobase::ExpressionSet(assayData = exprMN,
-#'                                  phenoData = new("AnnotatedDataFrame",
-#'                                                  data = pdataDF),
-#'                                  featureData = new("AnnotatedDataFrame",
-#'                                                    data = fdataDF),
-#'                                  experimentData = new("MIAME",
-#'                                                       title = setC))
-#'   # Adding to the MultiDataSet
-#'   nciMset <- MultiDataSet::add_eset(nciMset, eset, dataset.type = setC,
-#'                                     GRanges = NA, warnings = FALSE)
-#' }
-#' # Restricting to the 'ME' and 'LE' cancer types
-#' sampleNamesVc <- Biobase::sampleNames(nciMset[["agilent"]])
-#' cancerTypeVc <- Biobase::pData(nciMset[["agilent"]])[, "cancer"]
-#' nciMset <- nciMset[sampleNamesVc[cancerTypeVc %in% c("ME", "LE")], ]
-#' # Summary of the MultiDataSet
-#' nciMset
-#' # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
-#' nciBiosign <- biosigner::biosign(nciMset, "cancer")
-#' # Plotting the selected signatures
-#' plot(nciBiosign)
-#' @rdname plot
-#' @export
-setMethod("plot", signature(x = "biosignMultiDataSet"),
-          function(x,
-                   y,
-                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
-                   info.txtC = c("none", "interactive", "myfile.txt")[2],
-                   ...) {
-            
-            if (!(info.txtC %in% c("none", "interactive"))) {
-              sink(info.txtC, append = TRUE)
-            }
-            
-            infTxtC <- info.txtC
-            if (infTxtC != "none")
-              infTxtC <- "interactive"
-            
-            if (!(fig.pdfC %in% c("none", "interactive"))) {
-              pdf(fig.pdfC)
-            }
-            
-            figPdfC <- fig.pdfC
-            if (figPdfC != "none")
-              figPdfC <- "interactive"
-            
-            biosignLs <- x@biosignLs
-            
-            for (setI in 1:length(biosignLs)) {
-              plot(x@biosignLs[[setI]], subC = paste0("[", names(biosignLs)[setI], "]"),
-                   typeC = "tier",
-                   fig.pdfC = figPdfC,
-                   info.txtC = infTxtC,
-                   ...)
-              plot(x@biosignLs[[setI]], subC = paste0("[", names(biosignLs)[setI], "]"),
-                   typeC = "boxplot",
-                   fig.pdfC = figPdfC,
-                   info.txtC = infTxtC,
-                   ...)
-            }
-            
-            if (!(fig.pdfC %in% c("none", "interactive")))
-              dev.off()
-            
-            if (!(info.txtC %in% c("none", "interactive")))
-              sink()
-            
-          })
-
 ####    plot (biosign)   ####
 
 #' Plot method for 'biosign' signature objects
@@ -115,9 +21,6 @@ setMethod("plot", signature(x = "biosignMultiDataSet"),
 #' @param info.txtC Character: File name with '.txt' extension for the printed
 #' results (call to sink()'); if 'interactive' (default), messages will be
 #' printed on the screen; if 'none', no verbose will be generated
-#' @param file.pdfC Character: deprecated; use the 'fig.pdfC' argument instead
-#' @param .sinkC Character: deprecated; use the 'info.txtC' argument instead
-#' @param ... Currently not used.
 #' @return A plot is created on the current graphics device.
 #' @author Philippe Rinaudo and Etienne Thevenot (CEA)
 #' @examples
@@ -137,7 +40,6 @@ setMethod("plot", signature(x = "biosignMultiDataSet"),
 #' ## a bootI = 5 number of bootstraps is used for this example
 #' ## we recommend to keep the default bootI = 50 value for your analyzes
 #'
-#' set.seed(123)
 #' diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 #'
 #' ## individual boxplot of the selected signatures
@@ -154,50 +56,10 @@ setMethod("plot", signature(x = "biosign"),
                    tierMaxC = "S",
                    typeC = c("tier", "boxplot")[1],
                    
-                   plotSubC = NA,                  
+                   plotSubC = "",                  
                    fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
-                   info.txtC = c("none", "interactive", "myfile.txt")[2],
-                   
-                   file.pdfC = NULL,
-                   .sinkC = NULL,
-                   ...) {
-            
-            if (!is.null(file.pdfC)) {
-              warning("'file.pdfC' argument is deprecated; use 'fig.pdfC' instead.",
-                      call. = FALSE)
-              fig.pdfC <- file.pdfC
-            }
-            
-            if (!is.null(.sinkC)) {
-              warning("'.sinkC' argument is deprecated; use 'info.txtC' instead.",
-                      call. = FALSE)
-              info.txtC <- .sinkC
-            }
-            
-            if (is.null(info.txtC)) {
-              warning("'info.txtC = NULL' argument value is deprecated; use 'info.txtC = 'none'' instead.",
-                      call. = FALSE)
-              info.txtC <- 'none'
-            }
-            
-            if (is.na(info.txtC)) {
-              warning("'info.txtC = NA' argument value is deprecated; use 'info.txtC = 'interactive'' instead.",
-                      call. = FALSE)
-              info.txtC <- 'interactive'
-            }
-            
-            if (is.null(fig.pdfC)) {
-              warning("'fig.pdfC = NULL' argument value is deprecated; use 'fig.pdfC = 'none'' instead.",
-                      call. = FALSE)
-              fig.pdfC <- 'none'
-            }
-            
-            if (is.na(fig.pdfC)) {
-              warning("'fig.pdfC = NA' argument value is deprecated; use 'fig.pdfC = 'interactive'' instead.",
-                      call. = FALSE)
-              fig.pdfC <- 'interactive'
-            }
-            
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+
             if (fig.pdfC == "none")
               stop("'fig.pdfC' cannot be set to 'none' in the 'plot' method.",
                    call. = FALSE)
@@ -483,7 +345,7 @@ setMethod("plot", signature(x = "biosign"),
                      ## Title
                      
                      mainC <- "Tiers of the selected features"
-                     if (!is.na(plotSubC))
+                     if (plotSubC != "")
                        mainC <- paste0(mainC, " \n", plotSubC)
                      
                      title(mainC, adj = 0.1, outer = TRUE, line = -2.5)
@@ -528,7 +390,7 @@ setMethod("plot", signature(x = "biosign"),
                        mtext(bmkModVc, line = 0.1, cex = 0.6)
                      }
                      mainC <- paste0("'", switch(tierMaxC, S = "S", A = "S+A"), "' signature")
-                     if (!is.na(plotSubC))
+                     if (plotSubC != "")
                        mainC <- paste0(mainC, " ", plotSubC)
                      title(main = mainC,
                            line = 0.5, cex.main = 1.5, outer = TRUE)
@@ -542,6 +404,111 @@ setMethod("plot", signature(x = "biosign"),
             
             
             ## Closing connection
+            
+            if (!(info.txtC %in% c("none", "interactive")))
+              sink()
+            
+          })
+
+
+####    plot  (biosignMultiDataSet)  ####
+
+#' Plot method for biosign signatures
+#'
+#' This function plots signatures obtained by \code{biosign}.
+#'
+#' @aliases plot.biosignMultiDataSet plot,biosignMultiDataSet-method
+#' @examples
+#' # Loading the 'NCI60_4arrays' from the 'omicade4' package
+#' data("NCI60_4arrays", package = "omicade4")
+#' # Selecting two of the four datasets
+#' setNamesVc <- c("agilent", "hgu95")
+#' # Creating the MultiDataSet instance
+#' nciMset <- MultiDataSet::createMultiDataSet()
+#' # Adding the two datasets as ExpressionSet instances
+#' for (setC in setNamesVc) {
+#'   # Getting the data
+#'   exprMN <- as.matrix(NCI60_4arrays[[setC]])
+#'   # Reducing the number of features by 10 fold to speed up the example
+#'   exprMN <- exprMN[seq(1, nrow(exprMN), by = 10), ]
+#'   pdataDF <- data.frame(row.names = colnames(exprMN),
+#'                         cancer = substr(colnames(exprMN), 1, 2),
+#'                         stringsAsFactors = FALSE)
+#'   fdataDF <- data.frame(row.names = rownames(exprMN),
+#'                         name = rownames(exprMN),
+#'                         stringsAsFactors = FALSE)
+#'   # Building the ExpressionSet
+#'   eset <- Biobase::ExpressionSet(assayData = exprMN,
+#'                                  phenoData = new("AnnotatedDataFrame",
+#'                                                  data = pdataDF),
+#'                                  featureData = new("AnnotatedDataFrame",
+#'                                                    data = fdataDF),
+#'                                  experimentData = new("MIAME",
+#'                                                       title = setC))
+#'   # Adding to the MultiDataSet
+#'   nciMset <- MultiDataSet::add_eset(nciMset, eset, dataset.type = setC,
+#'                                     GRanges = NA, warnings = FALSE)
+#' }
+#' # Restricting to the 'ME' and 'LE' cancer types
+#' sampleNamesVc <- Biobase::sampleNames(nciMset[["agilent"]])
+#' cancerTypeVc <- Biobase::pData(nciMset[["agilent"]])[, "cancer"]
+#' nciMset <- nciMset[sampleNamesVc[cancerTypeVc %in% c("ME", "LE")], ]
+#' # Summary of the MultiDataSet
+#' nciMset
+#' # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
+#' nciBiosign <- biosign(nciMset, "cancer")
+#' # Plotting the selected signatures
+#' plot(nciBiosign)
+#' @rdname plot
+#' @export
+setMethod("plot", signature(x = "biosignMultiDataSet"),
+          function(x,
+                   y,
+                   tierMaxC = "S",
+                   typeC = c("tier", "boxplot")[1],
+                   
+                   plotSubC = "",                  
+                   fig.pdfC = c("none", "interactive", "myfile.pdf")[2],
+                   info.txtC = c("none", "interactive", "myfile.txt")[2]) {
+            
+            if (!(info.txtC %in% c("none", "interactive"))) {
+              sink(info.txtC, append = TRUE)
+            }
+            
+            infTxtC <- info.txtC
+            if (infTxtC != "none")
+              infTxtC <- "interactive"
+            
+            if (!(fig.pdfC %in% c("none", "interactive"))) {
+              pdf(fig.pdfC)
+            }
+            
+            figPdfC <- fig.pdfC
+            if (figPdfC != "none")
+              figPdfC <- "interactive"
+            
+            biosignLs <- x@biosignLs
+            
+            for (setI in 1:length(biosignLs)) {
+              plot(x = x@biosignLs[[setI]],
+                   tierMaxC = tierMaxC,
+                   typeC = "tier",
+                   
+                   plotSubC = paste0(plotSubC, " [", names(biosignLs)[setI], "]"),                  
+                   fig.pdfC = figPdfC,
+                   info.txtC = infTxtC)
+              
+              plot(x = x@biosignLs[[setI]],
+                   tierMaxC = tierMaxC,
+                   typeC = "boxplot",
+                   
+                   plotSubC = paste0(plotSubC, " [", names(biosignLs)[setI], "]"),                  
+                   fig.pdfC = figPdfC,
+                   info.txtC = infTxtC)
+            }
+            
+            if (!(fig.pdfC %in% c("none", "interactive")))
+              dev.off()
             
             if (!(info.txtC %in% c("none", "interactive")))
               sink()

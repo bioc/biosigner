@@ -237,12 +237,12 @@ getBootModelF <- function(dataLs = NULL,
   if (bootI != 0) {
 
     for (i in 1:bootI) {
-
+ 
       # generate the bootstrap
       dataLs <- bootExtractF(dataLs,
                              bootSubSampL = TRUE,
                              respC = respC)
-
+      
       # generate the corresponding modelAccuRank
       modelAccuRank <- getModelAccuRankF(getBootTrainxF(dataLs),
                                          getBootTrainyF(dataLs, respC),
@@ -256,6 +256,7 @@ getBootModelF <- function(dataLs = NULL,
 
       modelAccuRank$ind.test <- getBootTestIndF(dataLs)
       ## add to the heap
+
       modelAccuRankLs <- c(modelAccuRankLs, list(modelAccuRank))
     }
   }
@@ -404,15 +405,11 @@ getModelF <- function(xMN = NULL,
     names(argFulLs) <- argNamFulVc
     ## generates the model from training set
     if (methC == "opls") {
-      optWrnN <- getOption("warn")
-      options(warn = -1)
-      model <- try(do.call(methC, argFulLs), silent = TRUE)
-      if (inherits(model, "try-error") &&
-          substr(unclass(attr(model, "condition"))$message, 1, 85) == "No model was built because the first predictive component was already not significant") {
+      model <- do.call(methC, argFulLs)
+      if (cumprod(dim(ropls::getSummaryDF(model)))[2] < 1) {
         argFulLs <- c(argFulLs, list(predI = 1))
         model <- do.call(methC, argFulLs)
       }
-      options(warn = optWrnN)
     } else
       model <- do.call(methC, argFulLs)
 
@@ -463,7 +460,7 @@ getModelAccuRankF <- function(xMN = NULL,
   if(length(varCstVi) > 0)
     xMN <- xMN[, -varCstVi, drop = FALSE]
 
-  model <- getModelF(xMN = xMN,
+  model <- biosigner:::getModelF(xMN = xMN,
                      yFc = yFc,
                      methC = methC,
                      methNamLs = methNamLs,
@@ -472,7 +469,7 @@ getModelAccuRankF <- function(xMN = NULL,
   if(length(varCstVi) > 0)
     xTestMN <- xTestMN[, -varCstVi, drop = FALSE]
 
-  predTestFc <- getPredictionF(model = model,
+  predTestFc <- biosigner:::getPredictionF(model = model,
                                xTestMN = xTestMN,
                                predNamLs = predNamLs,
                                predArgLs = predArgLs)

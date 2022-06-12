@@ -2,6 +2,8 @@ library(biosigner)
 
 context("Testing 'biosigner'")
 
+#### biosign_plsda ####
+
 test_that("biosign_plsda", {
   
   data(diaplasma)
@@ -32,6 +34,9 @@ test_that("biosign_plsda", {
   
 })
 
+
+#### biosign_randomforest ####
+
 test_that("biosign_randomforest", {
   
   data(diaplasma)
@@ -57,6 +62,9 @@ test_that("biosign_randomforest", {
   
 })
 
+
+#### biosign_svm ####
+
 test_that("biosign_svm", {
   
   data(diaplasma)
@@ -80,6 +88,9 @@ test_that("biosign_svm", {
     
   }
 })
+
+
+#### biosign_predict ####
 
 test_that("biosign_predict", {
   
@@ -106,6 +117,8 @@ test_that("biosign_predict", {
     
   }
 })
+
+#### biosign_diaplasma ####
 
 test_that("biosign_diaplasma", {
   
@@ -142,6 +155,8 @@ test_that("biosign_diaplasma", {
   
 })
 
+#### biosign_sacurine ####
+
 test_that("biosign_sacurine", {
   
   data(sacurine, package = "ropls")
@@ -175,6 +190,142 @@ test_that("biosign_sacurine", {
   
 })
 
+
+#### SummarizedExperiment ####
+
+test_that("SummarizedExperiment", {
+
+  ## diaplasma
+  
+  data(diaplasma)
+  
+  diaplasma.se <- SummarizedExperiment::SummarizedExperiment(assays = list(diaplasma = t(diaplasma[["dataMatrix"]])),
+                                                             colData = diaplasma[["sampleMetadata"]],
+                                                             rowData = diaplasma[["variableMetadata"]])
+
+  diaplasma.se <- diaplasma.se[1:100, ]
+
+  diaplasma.se <- biosign(diaplasma.se, "type", bootI = 5)
+  
+  testthat::expect_identical(unname(SummarizedExperiment::rowData(diaplasma.se)["m096.009t01.6", "type_biosign_svm"]),
+                             "B")
+
+  diaplasma_type.biosign <- getBiosign(diaplasma.se)[["type_plsda.forest.svm"]]
+
+  dia_accu.mn <- getAccuracyMN(diaplasma_type.biosign)
+  
+  testthat::expect_equivalent(dia_accu.mn["S", "plsda"],
+                              0.7240521,
+                              tolerance = 1e-7)
+  
+  testthat::expect_equivalent(dia_accu.mn["AS", "randomforest"],
+                              0.6056708,
+                              tolerance = 1e-7)
+  
+  testthat::expect_equal(is.na(dia_accu.mn["S", "svm"]),
+                         TRUE)
+  
+  
+  ## sacurine
+  
+  data(sacurine, package = "ropls")
+  
+  sac.se <- SummarizedExperiment::SummarizedExperiment(assays = list(sacurine = t(sacurine[["dataMatrix"]])),
+                                                       colData = sacurine[["sampleMetadata"]],
+                                                       rowData = sacurine[["variableMetadata"]])
+  
+  # or sac.se <- sacurine[["se"]]
+  
+  sac.se <- biosign(sac.se, "gender", bootI = 5)
+  
+  testthat::expect_identical(unname(SummarizedExperiment::rowData(sac.se)["(2-methoxyethoxy)propanoic acid isomer", "gender_biosign_forest"]),
+                             "E")
+  
+  sac.biosign <- sac.se@metadata[["biosign"]][["gender_plsda.forest.svm"]]
+
+  sac_accu.mn <- getAccuracyMN(sac.biosign)
+  
+  testthat::expect_equivalent(sac_accu.mn["Full", "plsda"],
+                              0.8713552,
+                              tolerance = 1e-7)
+  
+  testthat::expect_equivalent(sac_accu.mn["AS", "randomforest"],
+                              0.9200604,
+                              tolerance = 1e-7)
+  
+  testthat::expect_equivalent(sac_accu.mn["S", "svm"],
+                              0.9306658,
+                              tolerance = 1e-7)
+
+})
+
+
+#### MultiAssayExperiment ####
+
+test_that("MultiAssayExperiment", {
+  
+  # Loading the 'NCI60_4arrays' from the 'omicade4' package
+  data("NCI60_4arrays", package = "omicade4")
+  # Selecting two of the four datasets
+  set_names.vc <- c("agilent", "hgu95")
+  # Creating the MultiAssayExperiemnt
+  nci.mae <- MultiAssayExperiment::MultiAssayExperiment()
+  # Adding the two datasets as SummarizedExperiment instances
+  experiment.ls <- list()
+  sampleMap.ls <- list()
+  for (set.c in set_names.vc) {
+    # Getting the data
+    assay.mn <- as.matrix(NCI60_4arrays[[set.c]])
+    # Reducing the number of features by 10 fold
+    assay.mn <- assay.mn[seq(1, nrow(assay.mn), by = 10), ]
+    coldata.df <- data.frame(row.names = colnames(assay.mn),
+                             .id = colnames(assay.mn),
+                             stringsAsFactors = FALSE)
+    rowdata.df <- data.frame(row.names = rownames(assay.mn),
+                             name = rownames(assay.mn),
+                             stringsAsFactors = FALSE)
+    # Building the SummarizedExperiment
+    assay.ls <- list(se = assay.mn)
+    names(assay.ls) <- set.c
+    se <- SummarizedExperiment::SummarizedExperiment(assays = assay.ls,
+                                                     colData = coldata.df,
+                                                     rowData = rowdata.df)
+    experiment.ls[[set.c]] <- se
+    sampleMap.ls[[set.c]] <- data.frame(primary = colnames(se),
+                                        colname = colnames(se))
+  }
+  sampleMap <- MultiAssayExperiment::listToMap(sampleMap.ls)
+  
+  stopifnot(identical(colnames(NCI60_4arrays[[1]]), colnames(NCI60_4arrays[[2]])))
+  sample_names.vc <- colnames(NCI60_4arrays[[1]])
+  colData.df <- data.frame(row.names = sample_names.vc,
+                           cancer = substr(sample_names.vc, 1, 2))
+  
+  nci.mae <- MultiAssayExperiment::MultiAssayExperiment(experiments = experiment.ls,
+                                                        colData = colData.df,
+                                                        sampleMap = sampleMap)
+  
+  # Restricting to the 'ME' and 'LE' cancer types
+  
+  nci.mae <- nci.mae[, nci.mae$cancer %in% c("ME", "LE"), ]
+
+  # Summary of the MultiDataSet
+  nci.mae
+  
+  # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
+  nci.mae <- biosign(nci.mae, "cancer", bootI = 5)
+
+  testthat::expect_identical(unname(SummarizedExperiment::rowData(nci.mae[["agilent"]])["ST8SIA1", "cancer_biosign_svm"]),
+                             "A")
+  testthat::expect_identical(unname(SummarizedExperiment::rowData(nci.mae[["hgu95"]])["TBC1D16", "cancer_biosign_plsda"]),
+                             "S")
+  
+  
+})
+
+
+#### ExpressionSet ####
+
 test_that("ExpressionSet", {
   
   data(diaplasma)
@@ -192,7 +343,7 @@ test_that("ExpressionSet", {
   
   diaSign <- biosign(diaSet, "type", bootI = 5, fig.pdfC = "test.pdf")
   
-  diaSet <- biosigner::getEset(diaSign)
+  diaSet <- getEset(diaSign)
   
   testthat::expect_equivalent(Biobase::fData(diaSet)["m490.111t12.5", "rtmed"],
                               749.17605, tolerance = 1e-5)
@@ -201,6 +352,8 @@ test_that("ExpressionSet", {
                              "E")
   
 })
+
+#### MultiDataSet ####
 
 test_that("MultiDataSet", {
   
@@ -214,6 +367,8 @@ test_that("MultiDataSet", {
   for (setC in setNamesVc) {
     # Getting the data
     exprMN <- as.matrix(NCI60_4arrays[[setC]])
+    # Reducing the number of features by 10 fold
+    exprMN <- exprMN[seq(1, nrow(exprMN), by = 10), ]
     pdataDF <- data.frame(row.names = colnames(exprMN),
                           cancer = substr(colnames(exprMN), 1, 2),
                           stringsAsFactors = FALSE)
@@ -239,18 +394,45 @@ test_that("MultiDataSet", {
   # Summary of the MultiDataSet
   nciMset
   # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
-  nciBiosign <- biosigner::biosign(nciMset, "cancer")
-  nciMset <- biosigner::getMset(nciBiosign)
+  nciBiosign <- biosign(nciMset, "cancer", bootI = 5)
+  nciMset <- getMset(nciBiosign)
   # In the updated MultiDataSet, the updated featureData now contains the cancer_biosign_'classifier' columns
   # indicating the selected features
   # lapply(Biobase::fData(nciMset), head)
   
-  testthat::expect_identical(Biobase::fData(nciMset)[["agilent"]]["GTPBP5", "cancer_biosign_plsda"],
-                             "E")
-  testthat::expect_identical(Biobase::fData(nciMset)[["hgu95"]]["TSPAN4", "cancer_biosign_plsda"],
+  testthat::expect_identical(Biobase::fData(nciMset)[["agilent"]]["ST8SIA1", "cancer_biosign_svm"],
                              "A")
+  testthat::expect_identical(Biobase::fData(nciMset)[["hgu95"]]["TBC1D16", "cancer_biosign_plsda"],
+                             "S")
   
   
 })
 
+#### biosign_ns ####
 
+test_that("biosign_ns", {
+  
+  data(sacurine, package = "ropls")
+
+  data.mn <- sacurine[["dataMatrix"]]
+  
+  gender.fc <- sacurine[["sampleMetadata"]][, "gender"]
+  
+  set.seed(123)
+  random.fc <- sample(gender.fc)
+  set.seed(NULL)
+  
+  random.biosign <- biosign(data.mn, random.fc, methodVc = "plsda")
+  
+  testthat::expect_equivalent(getAccuracyMN(random.biosign)["Full", "plsda"],
+                              0.4732016,
+                              tolerance = 1e-7)
+  
+  testthat::expect_equal(is.na(getAccuracyMN(random.biosign)["AS", "plsda"]),
+                         TRUE)
+  
+  testthat::expect_equal(is.na(getAccuracyMN(random.biosign)["S", "plsda"]),
+                         TRUE)
+ 
+ 
+})

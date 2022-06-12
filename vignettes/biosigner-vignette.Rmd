@@ -179,7 +179,7 @@ variableMetadata <- variableMetadata[featureSelVl, ]
 ```
 
 ```{r biosign}
-diaSign <- biosigner::biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
+diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 ```
 **Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and *SVM*
 classifiers extracted from the diaplasma dataset. The *S* tier corresponds to the
@@ -239,7 +239,7 @@ The **individual boxplots** of the features from the *complete* signature can be
 visualized with:
 
 ```{r boxplot}
-biosigner::plot(diaSign, typeC = "boxplot")
+plot(diaSign, typeC = "boxplot")
 ```
 **Figure 3:** Individual boxplots of the features selected for at least one of
 the classification methods. Features selected for a single classifier are
@@ -264,7 +264,7 @@ testVi <- setdiff(1:nrow(dataMatrix), trainVi)
 ```
 
 ```{r biosign_train, warning = FALSE}
-diaTrain <- biosigner::biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
+diaTrain <- biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
 bootI = 5)
 ```
 **Figure 4:** Signatures from the training data set.
@@ -273,7 +273,7 @@ We extract the **fitted** types on the training dataset restricted to the *S*
 signatures:
 
 ```{r predict}
-diaFitDF <- biosigner::predict(diaTrain)
+diaFitDF <- predict(diaTrain)
 ```
 
 We then print the confusion tables for each classifier:
@@ -298,13 +298,13 @@ Note that these values are slightly different from the accuracies returned by
 selected by the *bootI* (or *crossvalI*) arguments:
 
 ```{r getAccuracy}
-round(biosigner::getAccuracyMN(diaTrain)["S", ], 3)
+round(getAccuracyMN(diaTrain)["S", ], 3)
 ```
 
 Finally, we can compute the performances on the test subset:
 
 ```{r performance}
-diaTestDF <- biosigner::predict(diaTrain, newdata = dataMatrix[testVi, ])
+diaTestDF <- predict(diaTrain, newdata = dataMatrix[testVi, ])
 sapply(diaTestDF, function(predFc) {
 conf <- table(sampleMetadata[testVi, "type"], predFc)
 conf <- sweep(conf, 1, rowSums(conf), "/")
@@ -338,7 +338,7 @@ diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix),
 
 ropls::view(diaSet)
 
-biosigner::biosign(diaSet, "type", bootI = 5)
+biosign(diaSet, "type", bootI = 5)
 ```
 
 Note: Because of identical names in the two packages, the `combine` method from
@@ -382,7 +382,7 @@ We can for instance look for signatures of the *gender*:
 
 ```{r sacurine}
 data(sacurine)
-sacSign <- biosigner::biosign(sacurine[["dataMatrix"]],
+sacSign <- biosign(sacurine[["dataMatrix"]],
 sacurine[["sampleMetadata"]][, "gender"],
 methodVc = "plsda")
 ```

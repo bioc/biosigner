@@ -1,8 +1,8 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.25.0
-Date: 2020-11-18
+Version: 1.25.2
+Date: 2022-06-12
 Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
     <etienne.thevenot@cea.fr>
 Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
@@ -18,14 +18,15 @@ Description: Feature selection is critical in omics data analysis to extract
     models are returned, enabling future predictions on new datasets. A Galaxy
     implementation of the package is available within the Workflow4metabolomics.org
     online infrastructure for computational metabolomics.
-Depends:
-    Biobase,
-    ropls
 Imports:
+    Biobase,
     methods,
     e1071,
+    MultiAssayExperiment,
     MultiDataSet,
-    randomForest
+    randomForest,
+    ropls,
+    SummarizedExperiment
 Suggests:
     BioMark,
     BiocGenerics,
@@ -38,7 +39,8 @@ Suggests:
     testthat
 VignetteBuilder: knitr
 License: CeCILL
+Encoding: UTF-8
 LazyLoad: yes
 NeedsCompilation: no
 Packaged: 2016-05-03 10:14:01 UTC; admin-local
-RoxygenNote: 7.1.1
+RoxygenNote: 7.2.0

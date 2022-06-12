@@ -5,15 +5,13 @@
 \alias{getAccuracyMN,biosign-method}
 \title{Accuracies of the full model and the models restricted to the signatures}
 \usage{
-getAccuracyMN(object, ...)
+getAccuracyMN(object)
 
 \S4method{getAccuracyMN}{biosign}(object)
 }
 \arguments{
 \item{object}{An S4 object of class \code{biosign}, created by the
 \code{biosign} function.}
-
-\item{...}{Currently not used.}
 }
 \value{
 A numeric matrix containing the balanced accuracies for the full
