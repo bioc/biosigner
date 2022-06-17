@@ -264,59 +264,19 @@ test_that("SummarizedExperiment", {
 
 test_that("MultiAssayExperiment", {
   
-  # Loading the 'NCI60_4arrays' from the 'omicade4' package
-  data("NCI60_4arrays", package = "omicade4")
-  # Selecting two of the four datasets
-  set_names.vc <- c("agilent", "hgu95")
-  # Creating the MultiAssayExperiemnt
-  nci.mae <- MultiAssayExperiment::MultiAssayExperiment()
-  # Adding the two datasets as SummarizedExperiment instances
-  experiment.ls <- list()
-  sampleMap.ls <- list()
-  for (set.c in set_names.vc) {
-    # Getting the data
-    assay.mn <- as.matrix(NCI60_4arrays[[set.c]])
-    # Reducing the number of features by 10 fold
-    assay.mn <- assay.mn[seq(1, nrow(assay.mn), by = 10), ]
-    coldata.df <- data.frame(row.names = colnames(assay.mn),
-                             .id = colnames(assay.mn),
-                             stringsAsFactors = FALSE)
-    rowdata.df <- data.frame(row.names = rownames(assay.mn),
-                             name = rownames(assay.mn),
-                             stringsAsFactors = FALSE)
-    # Building the SummarizedExperiment
-    assay.ls <- list(se = assay.mn)
-    names(assay.ls) <- set.c
-    se <- SummarizedExperiment::SummarizedExperiment(assays = assay.ls,
-                                                     colData = coldata.df,
-                                                     rowData = rowdata.df)
-    experiment.ls[[set.c]] <- se
-    sampleMap.ls[[set.c]] <- data.frame(primary = colnames(se),
-                                        colname = colnames(se))
-  }
-  sampleMap <- MultiAssayExperiment::listToMap(sampleMap.ls)
-  
-  stopifnot(identical(colnames(NCI60_4arrays[[1]]), colnames(NCI60_4arrays[[2]])))
-  sample_names.vc <- colnames(NCI60_4arrays[[1]])
-  colData.df <- data.frame(row.names = sample_names.vc,
-                           cancer = substr(sample_names.vc, 1, 2))
-  
-  nci.mae <- MultiAssayExperiment::MultiAssayExperiment(experiments = experiment.ls,
-                                                        colData = colData.df,
-                                                        sampleMap = sampleMap)
-  
-  # Restricting to the 'ME' and 'LE' cancer types
-  
-  nci.mae <- nci.mae[, nci.mae$cancer %in% c("ME", "LE"), ]
-
-  # Summary of the MultiDataSet
-  nci.mae
+  data("NCI60", package = "ropls")
+  nci.mae <- NCI60[["mae"]]
+  library(MultiAssayExperiment)
+  # Cancer types
+  table(nci.mae$cancer)
+  # Restricting to the 'ME' and 'LE' cancer types and to the 'agilent' and 'hgu95' datasets
+  nci.mae <- suppressWarnings(nci.mae[, nci.mae$cancer %in% c("ME", "LE"), c("agilent", "hgu95")])
   
   # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
   nci.mae <- biosign(nci.mae, "cancer", bootI = 5)
 
   testthat::expect_identical(unname(SummarizedExperiment::rowData(nci.mae[["agilent"]])["ST8SIA1", "cancer_biosign_svm"]),
-                             "A")
+                             "B")
   testthat::expect_identical(unname(SummarizedExperiment::rowData(nci.mae[["hgu95"]])["TBC1D16", "cancer_biosign_plsda"]),
                              "S")
   
@@ -357,52 +317,32 @@ test_that("ExpressionSet", {
 
 test_that("MultiDataSet", {
   
-  # Loading the 'NCI60_4arrays' from the 'omicade4' package
-  data("NCI60_4arrays", package = "omicade4")
-  # Selecting two of the four datasets
-  setNamesVc <- c("agilent", "hgu95")
-  # Creating the MultiDataSet instance
-  nciMset <- MultiDataSet::createMultiDataSet()
-  # Adding the two datasets as ExpressionSet instances
-  for (setC in setNamesVc) {
-    # Getting the data
-    exprMN <- as.matrix(NCI60_4arrays[[setC]])
-    # Reducing the number of features by 10 fold
-    exprMN <- exprMN[seq(1, nrow(exprMN), by = 10), ]
-    pdataDF <- data.frame(row.names = colnames(exprMN),
-                          cancer = substr(colnames(exprMN), 1, 2),
-                          stringsAsFactors = FALSE)
-    fdataDF <- data.frame(row.names = rownames(exprMN),
-                          name = rownames(exprMN),
-                          stringsAsFactors = FALSE)
-    # Building the ExpressionSet
-    eset <- Biobase::ExpressionSet(assayData = exprMN,
-                                   phenoData = new("AnnotatedDataFrame",
-                                                   data = pdataDF),
-                                   featureData = new("AnnotatedDataFrame",
-                                                     data = fdataDF),
-                                   experimentData = new("MIAME",
-                                                        title = setC))
-    # Adding to the MultiDataSet
-    nciMset <- MultiDataSet::add_eset(nciMset, eset, dataset.type = setC,
-                                      GRanges = NA, warnings = FALSE)
-  }
+  data("NCI60", package = "ropls")
+  nci.mds <- NCI60[["mds"]]
+
+  # Restricting to the "agilent" and "hgu95" datasets
+
+  nci.mds <- nci.mds[, c("agilent", "hgu95")]
+
   # Restricting to the 'ME' and 'LE' cancer types
-  sampleNamesVc <- Biobase::sampleNames(nciMset[["agilent"]])
-  cancerTypeVc <- Biobase::pData(nciMset[["agilent"]])[, "cancer"]
-  nciMset <- nciMset[sampleNamesVc[cancerTypeVc %in% c("ME", "LE")], ]
-  # Summary of the MultiDataSet
-  nciMset
+
+  library(Biobase)
+  sample_names.vc <- Biobase::sampleNames(nci.mds[["agilent"]])
+  cancer_type.vc <- Biobase::pData(nci.mds[["agilent"]])[, "cancer"]
+  nci.mds <- nci.mds[sample_names.vc[cancer_type.vc %in% c("ME", "LE")], ]
+
   # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
-  nciBiosign <- biosign(nciMset, "cancer", bootI = 5)
-  nciMset <- getMset(nciBiosign)
+  
+  nci_cancer.biosign <- biosign(nci.mds, "cancer", bootI = 5)
+  
+  nci.mds <- getMset(nci_cancer.biosign)
   # In the updated MultiDataSet, the updated featureData now contains the cancer_biosign_'classifier' columns
   # indicating the selected features
   # lapply(Biobase::fData(nciMset), head)
   
-  testthat::expect_identical(Biobase::fData(nciMset)[["agilent"]]["ST8SIA1", "cancer_biosign_svm"],
-                             "A")
-  testthat::expect_identical(Biobase::fData(nciMset)[["hgu95"]]["TBC1D16", "cancer_biosign_plsda"],
+  testthat::expect_identical(Biobase::fData(nci.mds)[["agilent"]]["ST8SIA1", "cancer_biosign_svm"],
+                             "B")
+  testthat::expect_identical(Biobase::fData(nci.mds)[["hgu95"]]["TBC1D16", "cancer_biosign_plsda"],
                              "S")
   
   

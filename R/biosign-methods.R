@@ -786,6 +786,22 @@ setMethod("getBiosign", "SummarizedExperiment",
           })
 
 
+#### getBiosign (MultiAssayExperiment) ####
+
+#' @rdname getBiosign
+#' @export
+setMethod("getBiosign", "MultiAssayExperiment",
+          function(object) {
+            set.vc <- names(object)
+            biosign.ls <- vector(mode = "list", length = length(set.vc))
+            names(biosign.ls) <- set.vc
+            for (set.c in set.vc) {
+              biosign.ls[[set.c]] <- object[[set.c]]@metadata[["biosign"]]
+            }
+            return(biosign.ls)
+          })
+
+
 ####    getEset    ####
 
 #' getEset method

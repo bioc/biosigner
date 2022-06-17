@@ -3,11 +3,14 @@
 \name{getBiosign}
 \alias{getBiosign}
 \alias{getBiosign,SummarizedExperiment-method}
+\alias{getBiosign,MultiAssayExperiment-method}
 \title{Getting the biosigner signature from the SummarizedExperiment object}
 \usage{
 getBiosign(object)
 
 \S4method{getBiosign}{SummarizedExperiment}(object)
+
+\S4method{getBiosign}{MultiAssayExperiment}(object)
 }
 \arguments{
 \item{object}{An S4 object of class \code{SummarizedExperiment}, once processed by the \code{biosign}

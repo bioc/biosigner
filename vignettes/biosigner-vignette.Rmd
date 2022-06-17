@@ -5,13 +5,22 @@ date: "`r doc_date()`"
 package: "`r pkg_ver('biosigner')`"
 
 vignette: >
-  %\VignetteIndexEntry{Vignette Title}
-  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteIndexEntry{biosigner-vignette}
   %\VignetteEncoding{UTF-8}
+  %\VignetteKeywords{Classification, FeatureExtraction, Transcriptomics,
+    Proteomics, Metabolomics, Lipidomics, MassSpectrometry}
+  %\VignetteEngine{knitr::rmarkdown}
 bibliography: "biosigner-vignette.bib"
 output:
   BiocStyle::html_document:
-     fig_caption: yes
+    fig_caption: yes
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: false
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r global_options, include=FALSE}
@@ -21,102 +30,110 @@ knitr::opts_chunk$set(fig.width = 6, fig.height = 6, fig.path = 'figures/')
 # Introduction
 
 High-throughput, non-targeted, technologies such as **transcriptomics**,
-**proteomics** and **metabolomics**, are widely used to **discover molecules**
-which allow to efficiently discriminate between biological or clinical
-conditions of interest (e.g., disease vs control states). Powerful **machine
-learning** approaches such as **Partial Least Square Discriminant Analysis**
-(PLS-DA), **Random Forest** (RF) and **Support Vector Machines** (SVM) have been
-shown to achieve high levels of prediction accuracy. **Feature selection**,
-i.e., the selection of the few features (i.e., the molecular signature) which
-are of highest discriminating value, is a critical step in building a robust and
-relevant classifier [@Guyon2003]: First, dimension reduction is usefull to
-**limit the risk of overfitting** and **increase the prediction stability** of
-the model; second, **intrepretation** of the molecular signature is facilitated;
-third, in case of the development of diagnostic product, a restricted list is
-required for the **subsequent validation** steps [@Rifai2006].
+**proteomics** and **metabolomics**, are widely used to **discover
+molecules** which allow to efficiently discriminate between biological
+or clinical conditions of interest (e.g., disease vs control states).
+Powerful **machine learning** approaches such as **Partial Least Square
+Discriminant Analysis** (PLS-DA), **Random Forest** (RF) and **Support
+Vector Machines** (SVM) have been shown to achieve high levels of
+prediction accuracy. **Feature selection**, i.e., the selection of the
+few features (i.e., the molecular signature) which are of highest
+discriminating value, is a critical step in building a robust and
+relevant classifier [@Guyon2003]: First, dimension reduction is usefull
+to **limit the risk of overfitting** and **increase the prediction
+stability** of the model; second, **intrepretation** of the molecular
+signature is facilitated; third, in case of the development of
+diagnostic product, a restricted list is required for the **subsequent
+validation** steps [@Rifai2006].
 
 Since the comprehensive analysis of all combinations of features is not
-computationally tractable, several **selection techniques** have been described,
-including *filter* (e.g., *p*-values thresholding), *wrapper* (e.g., recursive
-feature elimination), and *embedded* (e.g., sparse PLS) approaches
-[@Saeys2007]. The major challenge for such methods is to be **fast** and extract
-**restricted and stable molecular signatures** which still provide **high
-performance** of the classifier [@Gromski2014; @Determan2015].
+computationally tractable, several **selection techniques** have been
+described, including *filter* (e.g., *p*-values thresholding), *wrapper*
+(e.g., recursive feature elimination), and *embedded* (e.g., sparse PLS)
+approaches [@Saeys2007]. The major challenge for such methods is to be
+**fast** and extract **restricted and stable molecular signatures**
+which still provide **high performance** of the classifier
+[@Gromski2014; @Determan2015].
 
 # The biosigner package
 
 The
-[biosigner](http://bioconductor.org/packages/release/bioc/html/biosigner.html)
+[`biosigner`](http://bioconductor.org/packages/release/bioc/html/biosigner.html)
 package implements a new **wrapper** feature selection algorithm:
 
-1. the dataset is split into training and testing subsets (by bootstraping,
-   controling class proportion),
+1.  the dataset is split into training and testing subsets (by
+    bootstraping, controling class proportion),
 
-2. model is trained on the training set and balanced accuracy is evaluated on
-   the test set,
+2.  model is trained on the training set and balanced accuracy is
+    evaluated on the test set,
 
-3. the features are ranked according to their importance in the model,
+3.  the features are ranked according to their importance in the model,
 
-4. the relevant feature subset at level *f* is found by a binary search: a
-   feature subset is considered relevant if and only if, when randomly permuting
-   the intensities of other features in the test subsets, the proportion of
-   increased or equal prediction accuracies is lower than a defined threshold
-   *f*,
+4.  the relevant feature subset at level *f* is found by a binary
+    search: a feature subset is considered relevant if and only if, when
+    randomly permuting the intensities of other features in the test
+    subsets, the proportion of increased or equal prediction accuracies
+    is lower than a defined threshold *f*,
 
-5. the dataset is restricted to the selected features and steps 1 to 4 are
-   repeated until the selected list of features is stable.
+5.  the dataset is restricted to the selected features and steps 1 to 4
+    are repeated until the selected list of features is stable.
 
 Three binary classifiers have been included in
-[biosigner](http://bioconductor.org/packages/release/bioc/html/biosigner.html),
-namely **PLS-DA**, **RF** and **SVM**, as the performances of each machine
-learning approach may vary depending on the structure of the dataset
-[@Determan2015]. The algorithm returns the **tier** of each feature for the
-selected classifer(s): tier **S** corresponds to the **final signature**, i.e.,
-features which have been found significant in all the selection steps; features
-with tier *A* have been found significant in all but the last selection, and so
-on for tier *B* to *D*. Tier *E* regroup all previous round of selection.
+[`biosigner`](http://bioconductor.org/packages/release/bioc/html/biosigner.html),
+namely **PLS-DA**, **RF** and **SVM**, as the performances of each
+machine learning approach may vary depending on the structure of the
+dataset [@Determan2015]. The algorithm returns the **tier** of each
+feature for the selected classifer(s): tier **S** corresponds to the
+**final signature**, i.e., features which have been found significant in
+all the selection steps; features with tier *A* have been found
+significant in all but the last selection, and so on for tier *B* to
+*D*. Tier *E* regroup all previous round of selection.
 
 As for a classical classification algorithm, the `biosign` method takes
 as input the `x` samples times features data frame (or matrix) of
 intensities, and the `y` factor (or character vector) of class labels
-(note that only binary classification is currently available). It returns the
-signature (`signatureLs`: selected feature names) and the trained model
-(`modelLs`) for each of the selected classifier. The `plot` method
-for `biosign` objects enable to visualize the individual boxplots of the
-selected features. Finally, the `predict` method allows to apply the
-trained classifier(s) on new datasets.
+(note that only binary classification is currently available). It
+returns the signature (`signatureLs`: selected feature names) and the
+trained model (`modelLs`) for each of the selected classifier. The
+`plot` method for `biosign` objects enable to visualize the individual
+boxplots of the selected features. Finally, the `predict` method allows
+to apply the trained classifier(s) on new datasets.
 
 The algorithm has been successfully applied to **transcriptomics** and
-**metabolomics** data [@Rinaudo2016; see also the *Hands-on* section below).
+**metabolomics** data [@Rinaudo2016; see also the *Hands-on* section
+below).
 
 # Hands-on
 
 ## Loading
 
-We first load the [biosigner](http://bioconductor.org/packages/release/bioc/html/biosigner.html)
+We first load the
+[`biosigner`](http://bioconductor.org/packages/release/bioc/html/biosigner.html)
 package:
 
 ```{r loading, message = FALSE}
 library(biosigner)
 ```
 
-We then use the **diaplasma** metabolomics dataset [@Rinaudo2016] which results
-from the analysis of **plasma samples from 69 diabetic patients** were analyzed
-by reversed-phase liquid chromatography coupled to high-resolution mass
-spectrometry (**LC-HRMS**; Orbitrap Exactive) in the negative ionization
-mode. The raw data were pre-processed with XCMS and CAMERA (5,501 features),
-corrected for signal drift, log10 transformed, and annotated with an in-house
-spectral database. The patient's **age**, **body mass index**, and **diabetic
-type** are recorded [@Rinaudo2016].
+We then use the **`diaplasma`** metabolomics dataset [@Rinaudo2016]
+which results from the analysis of **plasma samples from 69 diabetic
+patients** were analyzed by reversed-phase liquid chromatography coupled
+to high-resolution mass spectrometry (**LC-HRMS**; Orbitrap Exactive) in
+the negative ionization mode. The raw data were pre-processed with XCMS
+and CAMERA (5,501 features), corrected for signal drift, log10
+transformed, and annotated with an in-house spectral database. The
+patient's **age**, **body mass index**, and **diabetic type** are
+recorded [@Rinaudo2016].
 
 ```{r diaplasma}
 data(diaplasma)
 ```
 
-We attach *diaplasma* to the search path and display a summary of the content of
-the *dataMatrix*, *sampleMetadata* and *variableMetadata* with the `view`
-function from the (imported)
-[ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html) package:
+We attach *diaplasma* to the search path and display a summary of the
+content of the *dataMatrix*, *sampleMetadata* and *variableMetadata*
+with the `view` function from the (imported)
+[ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html)
+package:
 
 ```{r diaplasma_strF}
 attach(diaplasma)
@@ -128,30 +145,36 @@ ropls::view(variableMetadata, standardizeL = TRUE)
 
 We see that the **diaplasma** list contains three objects:
 
-1. **dataMatrix**: 69 samples x 5,501 matrix of numeric type containing the
-   intensity profiles (log10 transformed),
+1.  **`dataMatrix`**: 69 samples x 5,501 matrix of numeric type
+    containing the intensity profiles (log10 transformed),
 
-2. **sampleMetadata**: a 69 x 3 data frame, with the patients'
+2.  **`sampleMetadata`**: a 69 x 3 data frame, with the patients'
 
-	+ **type**: diabetic type, factor
+    -   **`type`**: diabetic type, factor
 
-	+ **age**: numeric
+    -   **`age`**: numeric
 
-	+ **bmi**: body mass index, numeric
+    -   **`bmi`**: body mass index, numeric
 
-3. **variableMetadata**: a 5,501 x 8 data frame, with the median m/z ('mzmed',
-   numeric) and the median retention time in seconds ('rtmed', numeric) from
-   XCMS, the 'isotopes' (character), 'adduct' (character) and 'pcgroups'
-   (numeric) annotations from CAMERA, the names of the m/z and RT matching
-   compounds from an in-house spectra of commercial metabolites ('name_hmdb',
-   character), and the *p*-values resulting from the non-parametric hypothesis
-   testing of difference in medians between types ('type_wilcox_fdr', numeric),
-   and correlation with age ('age_spearman_fdr', numeric) and body mass index
-   ('bmi_spearman_fdr', numeric), all corrected for multiple testing (False
-   Discovery Rate).
+3.  **`variableMetadata`**: a 5,501 x 8 data frame, with the median m/z
+    ('mzmed', numeric) and the median retention time in seconds
+    ('rtmed', numeric) from XCMS, the 'isotopes' (character), 'adduct'
+    (character) and 'pcgroups' (numeric) annotations from CAMERA, the
+    names of the m/z and RT matching compounds from an in-house spectra
+    of commercial metabolites ('name_hmdb', character), and the
+    *p*-values resulting from the non-parametric hypothesis testing of
+    difference in medians between types ('type_wilcox_fdr', numeric),
+    and correlation with age ('age_spearman_fdr', numeric) and body mass
+    index ('bmi_spearman_fdr', numeric), all corrected for multiple
+    testing (False Discovery Rate).
 
-We can observe that the 3 clinical covariates (diabetic *type*, *age*, and
-*bmi*) are stronlgy associated:
+4.  **`se`**: The previous data and metadata as a `SummarizedExperiment`
+    instance
+
+5.  **`eset`** The previous data as a `ExpressionSet` instance
+
+We can observe that the 3 clinical covariates (diabetic *type*, *age*,
+and *bmi*) are stronlgy associated:
 
 ```{r diaplasma_plot}
 with(sampleMetadata,
@@ -159,16 +182,17 @@ plot(age, bmi, cex = 1.5, col = ifelse(type == "T1", "blue", "red"), pch = 16))
 legend("topleft", cex = 1.5, legend = paste0("T", 1:2),
 text.col = c("blue", "red"))
 ```
-**Figure 1:** *age*, *body mass index (bmi)*, and diabetic *type* of the
-patients from the *diaplasma* cohort.
+
+**Figure 1:** `age`, *body mass index (*`bmi`*)*, and diabetic `type` of
+the patients from the `diaplasma` cohort.
 
 ## Molecular signatures
 
-Let us look for signatures of *type* in the *diaplasma* dataset by using the
-`biosign` method. To speed up computations in this demo vignette, we restrict
-the number of features (from 5,501 to about 500) and the number of bootstraps (5
-instead of 50 [default]); the selection on the whole dataset, 50 bootstraps, and
-the 3 classifiers, takes around 10 min.
+Let us look for signatures of *type* in the `diaplasma` dataset by using
+the `biosign` method. To speed up computations in this demo vignette, we
+restrict the number of features (from 5,501 to about 500) and the number
+of bootstraps (5 instead of 50 [default]); the selection on the whole
+dataset, 50 bootstraps, and the 3 classifiers, takes around 10 min.
 
 ```{r select}
 featureSelVl <- variableMetadata[, "mzmed"] >= 450 &
@@ -181,69 +205,76 @@ variableMetadata <- variableMetadata[featureSelVl, ]
 ```{r biosign}
 diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
 ```
-**Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and *SVM*
-classifiers extracted from the diaplasma dataset. The *S* tier corresponds to the
-final metabolite signature, i.e., metabolites which passed through all the
-selection steps.
+
+**Figure 2:** Relevant signatures for the *PLS-DA*, *Random Forest*, and
+*SVM* classifiers extracted from the `diaplasma` dataset. The *S* tier
+corresponds to the final metabolite signature, i.e., metabolites which
+passed through all the selection steps.
 
 The arguments are:
 
-+ `x`: the numerical matrix (or data frame) of intensities (samples as rows,
-  variables as columns),
+-   `x`: the numerical matrix (or data frame) of intensities (samples as
+    rows, variables as columns),
 
-+ `y`: the factor (or character) specifying the sample labels from the 2
-  classes,
+-   `y`: the factor (or character) specifying the sample labels from the
+    2 classes,
 
-+ `methodVc`: the classifier(s) to be used; here, the default *all* value means
-  that all classifiers available (*plsda*, *randomforest*, and *svm*) are
-  selected,
+-   `methodVc`: the classifier(s) to be used; here, the default *all*
+    value means that all classifiers available (*plsda*, *randomforest*,
+    and *svm*) are selected,
 
-+ `bootI`: the number of bootstraps is set to 5 to speed up computations when
-  generating this vignette; we however recommend to keep the default 50 value
-  for your analyzes (otherwise signatures may be less stable).
+-   `bootI`: the number of bootstraps is set to 5 to speed up
+    computations when generating this vignette; we however recommend to
+    keep the default 50 value for your analyzes (otherwise signatures
+    may be less stable).
 
-+ The `set.seed` argument ensures that the results from this
-  vignette can be reproduced exactly; by choosing alternative seeds (and the
-  default `bootI` = 50), similar signatures are obtained, showing the stability
-  of the selection.
+-   The `set.seed` argument ensures that the results from this vignette
+    can be reproduced exactly; by choosing alternative seeds (and the
+    default `bootI` = 50), similar signatures are obtained, showing the
+    stability of the selection.
 
 Note:
 
-+ If some features from the `x` matrix/data frame contain missing values (NA),
-  these features will be removed prior to modeling with Random Forest and SVM
-  (in contrast, the NIPALS algorithm from PLS-DA can handle missing values),
+-   If some features from the `x` matrix/data frame contain missing
+    values (NA), these features will be removed prior to modeling with
+    Random Forest and SVM (in contrast, the NIPALS algorithm from PLS-DA
+    can handle missing values),
 
-The resulting signatures for the 3 selected classifiers are both printed and
-plotted as **tiers** from *S*, *A*, up to *E* by decreasing relevance. The (*S*)
-tier corresponds to the final signature, i.e. features which passed through all
-the backward selection steps. In contrast, features from the other tiers were
-discarded during the last (*A*) or previous (*B* to *E*) selection rounds.
+The resulting signatures for the 3 selected classifiers are both printed
+and plotted as **tiers** from *S*, *A*, up to *E* by decreasing
+relevance. The (*S*) tier corresponds to the final signature, i.e.
+features which passed through all the backward selection steps. In
+contrast, features from the other tiers were discarded during the last
+(*A*) or previous (*B* to *E*) selection rounds.
 
-Note that *tierMaxC = 'A'* argument in the *print* and *plot* methods can be
-used to view the features from the larger *S+A* signatures (especially when no
-*S* features have been found, or when the performance of the *S* model is much
-lower than the *S+A* model).
+Note that *tierMaxC = 'A'* argument in the *print* and *plot* methods
+can be used to view the features from the larger *S+A* signatures
+(especially when no *S* features have been found, or when the
+performance of the *S* model is much lower than the *S+A* model).
 
 The **performance** of the model built with the input dataset (*balanced
 accuracy*: mean of the *sensitivity* and *specificity*), or the subset
-restricted to the *S* or *S+A* signatures are shown. We see that with 1 to 5 *S*
-feature signatures (i.e., less than 1% of the input), the 3 classifiers achieve
-good performances (even higher than the full Random Forest and SVM
-models). Furthermore, reducing the number of features decreases the risk of
-building non-significant models (i.e., models which do not perform significantly
-better than those built after randomly permuting the labels). The signatures
-from the 3 classifiers have some distinct features, which highlights the
-interest of comparing various machine learning approaches.
+restricted to the *S* or *S+A* signatures are shown. We see that with 1
+to 5 *S* feature signatures (i.e., less than 1% of the input), the 3
+classifiers achieve good performances (even higher than the full Random
+Forest and SVM models). Furthermore, reducing the number of features
+decreases the risk of building non-significant models (i.e., models
+which do not perform significantly better than those built after
+randomly permuting the labels). The signatures from the 3 classifiers
+have some distinct features, which highlights the interest of comparing
+various machine learning approaches.
 
-The **individual boxplots** of the features from the *complete* signature can be
-visualized with:
+The **individual boxplots** of the features from the *complete*
+signature can be visualized with:
 
 ```{r boxplot}
 plot(diaSign, typeC = "boxplot")
 ```
-**Figure 3:** Individual boxplots of the features selected for at least one of
-the classification methods. Features selected for a single classifier are
-colored (*red* for PLS-DA, *green* for Random Forest and *blue* for SVM).
+
+**Figure 3:** Individual boxplots of the features selected for at least
+one of the classification methods. Features selected for a single
+classifier are colored (*red* for PLS-DA, *green* for Random Forest and
+*blue* for SVM).
 
 Let us see the metadata of the *complete* signature:
 
@@ -251,12 +282,11 @@ Let us see the metadata of the *complete* signature:
 variableMetadata[getSignatureLs(diaSign)[["complete"]], ]
 ```
 
-
 ## Predictions
 
-Let us split the dataset into a training (the first 4/5th of the 183 samples)
-and a testing subsets, and extract the relevant features from the training
-subset:
+Let us split the dataset into a training (the first 4/5th of the 183
+samples) and a testing subsets, and extract the relevant features from
+the training subset:
 
 ```{r train}
 trainVi <- 1:floor(0.8 * nrow(dataMatrix))
@@ -267,10 +297,11 @@ testVi <- setdiff(1:nrow(dataMatrix), trainVi)
 diaTrain <- biosign(dataMatrix[trainVi, ], sampleMetadata[trainVi, "type"],
 bootI = 5)
 ```
+
 **Figure 4:** Signatures from the training data set.
 
-We extract the **fitted** types on the training dataset restricted to the *S*
-signatures:
+We extract the **fitted** types on the training dataset restricted to
+the *S* signatures:
 
 ```{r predict}
 diaFitDF <- predict(diaTrain)
@@ -293,9 +324,9 @@ round(mean(diag(conf)), 3)
 })
 ```
 
-Note that these values are slightly different from the accuracies returned by
-*biosign* because the latter are computed by using the resampling scheme
-selected by the *bootI* (or *crossvalI*) arguments:
+Note that these values are slightly different from the accuracies
+returned by *biosign* because the latter are computed by using the
+resampling scheme selected by the *bootI* (or *crossvalI*) arguments:
 
 ```{r getAccuracy}
 round(getAccuracyMN(diaTrain)["S", ], 3)
@@ -312,71 +343,235 @@ round(mean(diag(conf)), 3)
 })
 ```
 
-## Working on *ExpressionSet* omics objects from bioconductor
+## Working on `SummarizedExperiment` objects
 
-The **ExpressionSet** class from the
-[Biobase](http://bioconductor.org/packages/release/bioc/html/Biobase.html)
-bioconductor package has been developed to conveniently handle preprocessed
-omics objects, including the variables x samples matrix of intensities, and data
-frames containing the sample and variable metadata [@Huber2015]. The matrix and
-the two data frames can be accessed by the `exprs`, `pData` and `fData`
-respectively (note that the data matrix is stored in the object with samples in
-columns).
+The **`SummarizedExperiment`** class from the
+[SummarizedExperiment](https://www.bioconductor.org/packages/SummarizedExperiment/)
+bioconductor package has been developed to conveniently handle
+preprocessed omics objects, including the *variable x sample* matrix of
+intensities, and two DataFrames containing the sample and variable
+metadata, which can be accessed by the `assay`, `colData` and `rowData`
+methods respectively (remember that the data matrix is stored with
+samples in columns).
 
-The `biosign` method can be applied to an *ExpressionSet* object, by using the object as the `x` argument, and by indicating as the `y` argument the name of the phenoData column to be used as the response.
+Getting the `diaplasma` dataset as a `SummarizedExperiment`:
 
-In the example below, we will first build an *ExpressionSet* object from the *diaplasma* data set, we display its content with the `view` method from the `ropls` package, and we then perform the signature discovery:
+```{r get_se, message = FALSE}
+# Preparing the data (matrix) and sample and variable metadata (data frames):
+data(diaplasma)
+data.mn <- diaplasma[["dataMatrix"]] # matrix: samples x variables
+samp.df <- diaplasma[["sampleMetadata"]] # data frame: samples x sample metadata
+feat.df <- diaplasma[["variableMetadata"]] # data frame: features x feature metadata
 
-```{r expressionset_code, warning = FALSE, message = FALSE}
+# Creating the SummarizedExperiment (package SummarizedExperiment)
+library(SummarizedExperiment)
+dia.se <- SummarizedExperiment(assays = list(diaplasma = t(data.mn)),
+                               colData = samp.df,
+                               rowData = feat.df)
+# note that colData and rowData main format is DataFrame, but data frames are accepted when building the object
+stopifnot(validObject(dia.se))
+
+# Viewing the SummarizedExperiment
+# ropls::view(dia.se)
+```
+
+The `biosign` method can be applied to a **`SummarizedExperiment`**
+object, by using the object as the `x` argument, and by indicating as
+the `y` argument the name of the sample metadata to be used as the
+response (i.e. name of the column in the `colData`). Note that in the
+example below, we restrict the data set to the first 100 features to
+speed up computations:
+
+```{r se_biosign, echo = TRUE, results = "hide"}
+dia.se <- dia.se[1:100, ]
+dia.se <- biosign(dia.se, "type", bootI = 5)
+```
+
+The `biosign` method returns the updated **`SummarizedExperiment`**
+object with the tiers as new columns in the `rowData`
+
+```{r se_updated}
+feat.DF <- SummarizedExperiment::rowData(dia.se)
+head(feat.DF[, grep("type_", colnames(feat.DF))])
+```
+
+and with the `biosign` model in the `metadata` slot, which can be
+accessed with the `getBiosign` method:
+
+```{r se_model}
+dia_type.biosign <- getBiosign(dia.se)
+names(dia_type.biosign)
+plot(dia_type.biosign[["type_plsda.forest.svm"]], typeC = "tier")
+```
+
+### `ExpressionSet` format
+
+The `ExpressionSet` format is currently supported as a legacy
+representation from the previous versions of the `biosigner` package (\<
+1.24.2) but will now be supplanted by `SummarizedExperiment` in future
+versions.
+
+`exprs`, `pData`, and `fData` for `ExpressionSet` are similar to
+`assay`, `colData` and `rowData` for `SummarizedExperiment` except that
+`assay` is a list which can potentially include several matrices, and
+that `colData` and `rowData` are of the `DataFrame` format.
+`SummarizedExperiment` format further enables to store additional
+metadata (such as models or ggplots) in a dedicated `metadata` slot.
+
+In the example below, we will first build a minimal **`ExpressionSet`**
+object from the `diaplasma` data set and view the data, and we
+subsequently perform the feature selection.
+
+Getting the `diaplasma` data set as a `ExpressionSet`:
+
+```{r get_eset, message = FALSE}
+# Preparing the data (matrix) and sample and variable metadata (data frames):
+data(diaplasma)
+data.mn <- diaplasma[["dataMatrix"]] # matrix: samples x variables
+samp.df <- diaplasma[["sampleMetadata"]] # data frame: samples x sample metadata
+feat.df <- diaplasma[["variableMetadata"]] # data frame: features x feature metadata
+
+# Creating the SummarizedExperiment (package SummarizedExperiment)
 library(Biobase)
-
-diaSet <- Biobase::ExpressionSet(assayData = t(dataMatrix),
-                                 phenoData = new("AnnotatedDataFrame",
-                                                 data = sampleMetadata),
-                                 featureData = new("AnnotatedDataFrame",
-                                                 data = variableMetadata))
-
-ropls::view(diaSet)
-
-biosign(diaSet, "type", bootI = 5)
+dia.eset <- Biobase::ExpressionSet(assayData = t(data.mn))
+Biobase::pData(dia.eset) <- samp.df
+Biobase::fData(dia.eset) <- feat.df
+stopifnot(validObject(dia.eset))
+# Viewing the ExpressionSet
+# ropls::view(dia.eset)
 ```
 
-Note: Because of identical names in the two packages, the `combine` method from
-package
-[Biobase](http://bioconductor.org/packages/release/bioc/html/Biobase.html) is
-replaced by the `combine` method from package
-[randomForest](https://cran.r-project.org/web/packages/randomForest/index.html).
+Selecting the features:
 
-The *ExpressionSet* can be displayed 
-
-```{r view_ExpressionSet}
-ropls::view(diaSet)
+```{r dia_se_biosign, echo = TRUE, results = "hide"}
+dia.eset <- dia.eset[1:100, ]
+dia_type.biosign <- biosign(dia.eset, "type", bootI = 5)
 ```
 
+Note that this time, `biosign` returns the models an en object of the
+`biosign` class.
 
-Before moving to new data sets, we detach *diaplasma* from the search path:
+```{r dia_se_plot}
+plot(dia_type.biosign, typeC = "tier")
+```
+
+The updated `ExpressionSet` object can be accessed with the `getEset`
+method:
+
+```{r dia_se_updated}
+dia.eset <- getEset(dia_type.biosign)
+feat.df <- Biobase::fData(dia.eset)
+head(feat.df[, grep("type_", colnames(feat.df))])
+```
+
+Before moving to new data sets, we detach *diaplasma* from the search
+path:
 
 ```{r detach}
 detach(diaplasma)
 ```
 
+## Working on `MultiAssayExperiment` objects
+
+The `MultiAssayExperiment` format is useful to handle **multi-omics**
+data sets [@Ramos_SoftwareIntegrationMultiomics_2017]. Feature selection
+can be performed in parallel for each data set by applying `opls` to
+such formats. We provide an example based on the `NCI60_4arrays` cancer
+data set from the `omicade4` package (which has been made available in
+this `ropls` package in the `MultiAssayExperiment` format).
+
+Getting the `NCI60` data set as a `MultiAssayExperiment`:
+
+```{r nci60_mae, message = FALSE}
+data("NCI60", package = "ropls")
+nci.mae <- NCI60[["mae"]]
+library(MultiAssayExperiment)
+# Cancer types
+table(nci.mae$cancer)
+# Restricting to the 'ME' and 'LE' cancer types and to the 'agilent' and 'hgu95' datasets
+nci.mae <- nci.mae[, nci.mae$cancer %in% c("ME", "LE"), c("agilent", "hgu95")]
+```
+
+Performing the feature selection for each dataset:
+
+```{r mae_biosign}
+nci.mae <- biosign(nci.mae, "cancer", bootI = 5)
+```
+
+The `biosigner` method returns an updated `MultiAssayExperiment` with
+the tiers included as additional columns in the `rowData` of the
+individual `SummarizedExperiment`:
+
+```{r mae_updated}
+SummarizedExperiment::rowData(nci.mae[["agilent"]])
+```
+
+The biosign model(s) are stored in the metadata of the individual
+`SummarizedExperiment` objects included in the `MultiAssayExperiment`,
+and can be accessed with the `getBiosign` method:
+
+```{r mae_model}
+mae_biosign.ls <- getBiosign(nci.mae)
+for (set.c in names(mae_biosign.ls))
+plot(mae_biosign.ls[[set.c]][["cancer_plsda.forest.svm"]],
+     typeC = "tier",
+     plotSubC = set.c)
+```
+
+### `MultiDataSet` objects
+
+The `MultiDataSet` format [@Ramos_SoftwareIntegrationMultiomics_2017] is
+currently supported as a legacy representation from the previous
+versions of the `biosigner` package (\<1.24.2) but will now be
+supplanted by `MultiAssayExperiment` in future versions. Note that the
+`mds2mae` method from the `MultiDataSet` package enables to convert a
+`MultiDataSet` into the `MultiAssayExperiment` format.
+
+Getting the `NCI60` data set as a `MultiDataSet`:
+
+```{r get_mds}
+data("NCI60", package = "ropls")
+nci.mds <- NCI60[["mds"]]
+```
+
+Building PLS-DA models for the cancer type:
+
+```{r mds_biosign, echo = TRUE, results = "hide"}
+# Restricting to the "agilent" and "hgu95" datasets
+nci.mds <- nci.mds[, c("agilent", "hgu95")]
+# Restricting to the 'ME' and 'LE' cancer types
+library(Biobase)
+sample_names.vc <- Biobase::sampleNames(nci.mds[["agilent"]])
+cancer_type.vc <- Biobase::pData(nci.mds[["agilent"]])[, "cancer"]
+nci.mds <- nci.mds[sample_names.vc[cancer_type.vc %in% c("ME", "LE")], ]
+# Selecting the features
+nci_cancer.biosign <- biosign(nci.mds, "cancer", bootI = 5)
+```
+
+Getting back the updated `MultiDataSet`:
+
+```{r mds_getmset}
+nci.mds <- getMset(nci_cancer.biosign)
+```
+
 # Extraction of biomarker signatures from other omics datasets
 
 In this section, `biosign` is applied to two metabolomics and one
-transcriptomics data sets. Please refer to @Rinaudo2016 for a full discussion of
-the methods and results.
+transcriptomics data sets. Please refer to @Rinaudo2016 for a full
+discussion of the methods and results.
 
 ## Physiological variations of the human urine metabolome (metabolomics)
 
-The **sacurine** LC-HRMS dataset from the dependent
-[ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html) package
-can also be used [@Thevenot2015]: Urine samples from a cohort of 183 adults were
-analyzed by using an LTQ Orbitrap in the negative ionization mode. A total of
-109 metabolites were identified or annotated at the MSI level 1 or 2. Signal
-drift and batch effect were corrected, and each urine profile was normalized to
-the osmolality of the sample. Finally, the data were log10 transformed (see the
-[ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html) vignette
-for further details and examples).
+The **`sacurine`** LC-HRMS dataset from the dependent
+[`ropls`](http://bioconductor.org/packages/release/bioc/html/ropls.html)
+package can also be used [@Thevenot2015]: Urine samples from a cohort of
+183 adults were analyzed by using an LTQ Orbitrap in the negative
+ionization mode. A total of 109 metabolites were identified or annotated
+at the MSI level 1 or 2. Signal drift and batch effect were corrected,
+and each urine profile was normalized to the osmolality of the sample.
+Finally, the data were log10 transformed (see the
+[`ropls`](http://bioconductor.org/packages/release/bioc/html/ropls.html)
+vignette for further details and examples).
 
 We can for instance look for signatures of the *gender*:
 
@@ -386,20 +581,22 @@ sacSign <- biosign(sacurine[["dataMatrix"]],
 sacurine[["sampleMetadata"]][, "gender"],
 methodVc = "plsda")
 ```
+
 **Figure 5:** PLS-DA signature from the 'sacurine' data set.
 
 ## Apples spikes with known compounds (metabolomics)
 
-The **spikedApples** dataset was obtained by LC-HRMS analysis (SYNAPT Q-TOF,
-Waters) of one control and three spiked groups of 10 apples each. The spiked
-mixtures consists in 2 compounds which were not naturally present in the matrix
-and 7 compounds aimed at achieving a final increase of 20%, 40% or 100% of the
-endogeneous concentrations. The authors identified 22 features (out of the 1,632
-detected in the positive ionization mode; i.e. 1.3%) which came from the spiked
+The **spikedApples** dataset was obtained by LC-HRMS analysis (SYNAPT
+Q-TOF, Waters) of one control and three spiked groups of 10 apples each.
+The spiked mixtures consists in 2 compounds which were not naturally
+present in the matrix and 7 compounds aimed at achieving a final
+increase of 20%, 40% or 100% of the endogeneous concentrations. The
+authors identified 22 features (out of the 1,632 detected in the
+positive ionization mode; i.e. 1.3%) which came from the spiked
 compounds. The dataset is included in the
-[BioMark](https://cran.r-project.org/web/packages/BioMark/index.html) R package
-[@Franceschi2012]. Let us use the *control* and *group1* samples (20 in total)
-in this study.
+[BioMark](https://cran.r-project.org/web/packages/BioMark/index.html) R
+package [@Franceschi2012]. Let us use the *control* and *group1* samples
+(20 in total) in this study.
 
 ```{r biomark, warning = FALSE, message = FALSE}
 library(BioMark)
@@ -412,19 +609,20 @@ rownames(annotDF) <- colnames(appleMN)
 ```
 
 We can check, by using the `opls` method from the
-[ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html) package
-for multivariate analysis, that:
+[ropls](http://bioconductor.org/packages/release/bioc/html/ropls.html)
+package for multivariate analysis, that:
 
-1. no clear separation can be observed by PCA:
+1.  no clear separation can be observed by PCA:
 
 ```{r biomark_pca}
 biomark.pca <- ropls::opls(appleMN, fig.pdfC = "none")
 ropls::plot(biomark.pca, parAsColFcVn = spikeFc)
 ```
 
-2. PLS-DA modeling with the full dataset is not significant (as seen on
-the top left plot: 7 out of 20 models trained after random permutations of the
-labels have Q2 values higher than the model trained with the true labels):
+2.  PLS-DA modeling with the full dataset is not significant (as seen on
+    the top left plot: 7 out of 20 models trained after random
+    permutations of the labels have Q2 values higher than the model
+    trained with the true labels):
 
 ```{r biomark_pls}
 biomark.pls <- ropls::opls(appleMN, spikeFc)
@@ -433,7 +631,7 @@ biomark.pls <- ropls::opls(appleMN, spikeFc)
 Let us now extract the molecular signatures:
 
 ```{r apple_biosign, warning = FALSE}
-appleSign <- biosigner::biosign(appleMN, spikeFc)
+appleSign <- biosign(appleMN, spikeFc)
 ```
 
 The *449.1/327* corresponds to the Cyanidin-3-galactoside (absent in the
@@ -447,46 +645,49 @@ annotDF[getSignatureLs(appleSign)[["complete"]], c("adduct", "found.in.standards
 
 ## Bone marrow from acute leukemia patients (transcriptomics)
 
-Samples from 47 patients with acute lymphoblastic leukemia (ALL) and 25 patients
-with acute myeloid leukemia (AML) have been analyzed using Affymetrix Hgu6800
-chips resulting in expression data of 7,129 gene probes [@Golub1999]. The
-**golub** dataset is available in the
-[golubEsets](https://bioconductor.org/packages/release/data/experiment/html/golubEsets.html)
-package from Bioconductor. Let us compute for example the SVM signature (to
-speed up this demo example, the number of features is restricted to 500):
+Samples from 47 patients with acute lymphoblastic leukemia (ALL) and 25
+patients with acute myeloid leukemia (AML) have been analyzed using
+Affymetrix Hgu6800 chips resulting in expression data of 7,129 gene
+probes [@Golub1999]. The **golub** dataset is available in the
+[`golubEsets`](https://bioconductor.org/packages/release/data/experiment/html/golubEsets.html)
+package from Bioconductor in the `ExpressionSet` format. Let us compute
+for example the SVM signature (to speed up this demo example, the number
+of features is restricted to 500):
 
-```{r golub_false, warning = FALSE, message = FALSE}
+```{r golub, warning = FALSE, message = FALSE}
 library(golubEsets)
 data(Golub_Merge)
-golubMN <- t(exprs(Golub_Merge))
-leukemiaFc <- pData(Golub_Merge)[["ALL.AML"]]
-table(leukemiaFc)
-varSubVi <- 1501:2000
-golubSign <- biosigner::biosign(golubMN[, varSubVi], leukemiaFc, methodVc = "svm")
+Golub_Merge
+# restricting to the last 500 features
+golub.eset <- Golub_Merge[1501:2000, ]
+table(Biobase::pData(golub.eset)[, "ALL.AML"])
+golubSign <- biosign(golub.eset, "ALL.AML", methodVc = "svm")
 ```
+
 **Figure 6:** SVM signature from the *golub* data set.
 
-The computation results in a signature of 4 features only and a sparse SVM model
-performing even better (95.9% accuracy) than the model trained on the dataset
-of 500 variables (95.5% accuracy).
+The computation results in a signature of 4 features only and a sparse
+SVM model performing even better (95.9% accuracy) than the model trained
+on the dataset of 500 variables (95.5% accuracy).
 
 The
 [hu6800.db](https://bioconductor.org/packages/release/data/annotation/html/hu6800.db.html)
-bioconductor package can be used to get the annotation of the selected probes
-[@Carlson2016]:
+bioconductor package can be used to get the annotation of the selected
+probes [@Carlson2016]:
 
 ```{r hu6800, warning = FALSE, message = FALSE}
 library(hu6800.db)
-sapply(biosigner::getSignatureLs(golubSign)[["complete"]],
+sapply(getSignatureLs(golubSign)[["complete"]],
        function(probeC)
        get(probeC, env = hu6800GENENAME))
 ```
 
-Cystatin C is part of the 50 gene signature selected by Golub and colleagues on
-the basis of a metric derived from the Student's statistic of mean differences
-between the AML and ALL groups [@Golub1999]. Interestingly, the third probe,
-myeloperoxidase, is a cytochemical marker for the diagnosis (and also
-potentially the prognosis) of acute myeloid leukemia (AML).
+Cystatin C is part of the 50 gene signature selected by Golub and
+colleagues on the basis of a metric derived from the Student's statistic
+of mean differences between the AML and ALL groups [@Golub1999].
+Interestingly, the third probe, myeloperoxidase, is a cytochemical
+marker for the diagnosis (and also potentially the prognosis) of acute
+myeloid leukemia (AML).
 
 ```{r empty, echo = FALSE}
 rm(list = ls())
@@ -494,8 +695,8 @@ rm(list = ls())
 
 # Session info
 
-Here is the output of `sessionInfo()` on the system on which this document was
-compiled:
+Here is the output of `sessionInfo()` on the system on which this
+document was compiled:
 
 ```{r sessionInfo, echo=FALSE}
 sessionInfo()

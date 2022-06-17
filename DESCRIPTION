@@ -1,14 +1,14 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.25.2
-Date: 2022-06-12
-Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
-    <etienne.thevenot@cea.fr>
-Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
-    <etienne.thevenot@cea.fr>
+Version: 1.25.4
+Date: 2022-06-17
+Authors@R:
+    c(person("Philippe", "Rinaudo", email = "phd.rinaudo@gmail.com", role = c("aut")),
+    person("Etienne A.", "Thevenot", email = "etienne.thevenot@cea.fr", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1019-4577")))
+Maintainer: Etienne A. Thevenot <etienne.thevenot@cea.fr>
 biocViews: Classification, FeatureExtraction, Transcriptomics,
-    Proteomics, Metabolomics, Lipidomics
+    Proteomics, Metabolomics, Lipidomics, MassSpectrometry
 Description: Feature selection is critical in omics data analysis to extract
     restricted and meaningful molecular signatures from complex and high-dimension
     data, and to build robust classifiers. This package implements a new method to
@@ -41,6 +41,7 @@ VignetteBuilder: knitr
 License: CeCILL
 Encoding: UTF-8
 LazyLoad: yes
+URL: http://dx.doi.org/10.3389/fmolb.2016.00026
 NeedsCompilation: no
 Packaged: 2016-05-03 10:14:01 UTC; admin-local
 RoxygenNote: 7.2.0

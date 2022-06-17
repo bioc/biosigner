@@ -185,14 +185,14 @@ getBootTestIndF <- function(dataLs = NULL)
 getAccuracyF <- function(predTestFc = NULL,
                          yTestFc = NULL){
 
-    if (class(yTestFc) != "numeric") {
+    if (!is.numeric(yTestFc)) {
 
       yTestVc <- as.character(yTestFc)
       yClassVc <- unique(yTestVc)
       if (length(yClassVc) != 2)
         stop("Computing accuracy for 2-class discrimination only")
 
-      if (class(predTestFc) == "numeric")
+      if (is.numeric(predTestFc))
         stop("Predicted output is numeric and original output is not numeric (factor or character)")
       predTestVc <- as.character(predTestFc)
 
@@ -338,12 +338,12 @@ getImportanceF <- function(model = NULL,
                            ## predArgLs=NULL
                            ){
 
-    if (class(model) == "svm"){ ## weights (w)
+    if (inherits(model, "svm")){ ## weights (w)
 
         varImpVn <- (t(model[["coefs"]]) %*% xTrainMN[model[["index"]],])^2
 
     }
-    else if (class(model) == "opls"){ ## VIP
+    else if (inherits(model, "opls")){ ## VIP
 
         ## initialize
         varImpVn <- rep(0, ncol(xTrainMN))
@@ -353,7 +353,7 @@ getImportanceF <- function(model = NULL,
         varImpVn[vipVi] <- vipVn
 
     }
-    else if (class(model) == "randomForest"){
+    else if (inherits(model, "randomForest")){
 
         varImpVn <- model[["importance"]][, 1]
 
@@ -460,7 +460,7 @@ getModelAccuRankF <- function(xMN = NULL,
   if(length(varCstVi) > 0)
     xMN <- xMN[, -varCstVi, drop = FALSE]
 
-  model <- biosigner:::getModelF(xMN = xMN,
+  model <- getModelF(xMN = xMN,
                      yFc = yFc,
                      methC = methC,
                      methNamLs = methNamLs,
@@ -469,7 +469,7 @@ getModelAccuRankF <- function(xMN = NULL,
   if(length(varCstVi) > 0)
     xTestMN <- xTestMN[, -varCstVi, drop = FALSE]
 
-  predTestFc <- biosigner:::getPredictionF(model = model,
+  predTestFc <- getPredictionF(model = model,
                                xTestMN = xTestMN,
                                predNamLs = predNamLs,
                                predArgLs = predArgLs)

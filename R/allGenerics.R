@@ -113,50 +113,67 @@
 #' 
 #' detach(diaplasma)
 #' 
+#' ## Application to a MultiAssayExperiment
+#' 
+#' data("NCI60", package = "ropls")
+#' nci.mae <- NCI60[["mae"]]
+#' library(MultiAssayExperiment)
+#' 
+#' # Cancer types
+#' 
+#' table(nci.mae$cancer)
+#' 
+#' # Restricting to the 'ME' and 'LE' cancer types and to the 'agilent' and 'hgu95' datasets
+#' 
+#' nci.mae <- nci.mae[, nci.mae$cancer %in% c("ME", "LE"), c("agilent", "hgu95")]
+#' 
+#' # Selecting the significant features for PLS-DA, RF, and SVM classifiers
+#' 
+#' nci.mae <- biosign(nci.mae, "cancer", bootI = 5)
+#' 
+#' # Getting the tiers
+#' 
+#' SummarizedExperiment::rowData(nci.mae[["agilent"]])
+#' 
+#' # Getting the models
+#' 
+#' mae_biosign.ls <- getBiosign(nci.mae)
+#' 
+#' # Name of the models stored in the (metadata of) each SummarizedExperiment object
+#' 
+#' names(mae_biosign.ls[["agilent"]])
+#' 
+#' # Visualizing the individual results
+#' 
+#' for (set.c in names(mae_biosign.ls))
+#'   plot(mae_biosign.ls[[set.c]][["cancer_plsda.forest.svm"]],
+#'        typeC = "tier",
+#'        plotSubC = set.c)
+#' 
 #' ## Application to a MultiDataSet
 #' 
-#' # Loading the 'NCI60_4arrays' from the 'omicade4' package
-#' data("NCI60_4arrays", package = "omicade4")
-#' # Selecting two of the four datasets
-#' setNamesVc <- c("agilent", "hgu95")
-#' # Creating the MultiDataSet instance
-#' nciMset <- MultiDataSet::createMultiDataSet()
-#' # Adding the two datasets as ExpressionSet instances
-#' for (setC in setNamesVc) {
-#'   # Getting the data
-#'   exprMN <- as.matrix(NCI60_4arrays[[setC]])
-#'   # Reducing the number of features by 10 fold to speed up the example
-#'   exprMN <- exprMN[seq(1, nrow(exprMN), by = 10), ]
-#'   pdataDF <- data.frame(row.names = colnames(exprMN),
-#'                         cancer = substr(colnames(exprMN), 1, 2),
-#'                         stringsAsFactors = FALSE)
-#'   fdataDF <- data.frame(row.names = rownames(exprMN),
-#'                         name = rownames(exprMN),
-#'                         stringsAsFactors = FALSE)
-#'   # Building the ExpressionSet
-#'   eset <- Biobase::ExpressionSet(assayData = exprMN,
-#'                                  phenoData = new("AnnotatedDataFrame",
-#'                                                  data = pdataDF),
-#'                                  featureData = new("AnnotatedDataFrame",
-#'                                                    data = fdataDF),
-#'                                  experimentData = new("MIAME",
-#'                                                       title = setC))
-#'   # Adding to the MultiDataSet
-#'   nciMset <- MultiDataSet::add_eset(nciMset, eset, dataset.type = setC,
-#'                                     GRanges = NA, warnings = FALSE)
-#' }
+#' data("NCI60", package = "ropls")
+#' nci.mds <- NCI60[["mds"]]
+#' 
+#' # Restricting to the "agilent" and "hgu95" datasets
+#' 
+#' nci.mds <- nci.mds[, c("agilent", "hgu95")]
+#' 
 #' # Restricting to the 'ME' and 'LE' cancer types
-#' sampleNamesVc <- Biobase::sampleNames(nciMset[["agilent"]])
-#' cancerTypeVc <- Biobase::pData(nciMset[["agilent"]])[, "cancer"]
-#' nciMset <- nciMset[sampleNamesVc[cancerTypeVc %in% c("ME", "LE")], ]
-#' # Summary of the MultiDataSet
-#' nciMset
-#' # Building PLS-DA models for the cancer type, and getting back the updated MultiDataSet
-#' nciPlsda <- ropls::opls(nciMset, "cancer", predI = 2)
-#' nciMset <- ropls::getMset(nciPlsda)
-#' # Selecting the significant features for PLS-DA, RF, and SVM classifiers, and getting back the updated MultiDataSet
-#' nciBiosign <- biosign(nciMset, "cancer", bootI = 5)
-#' nciMset <- getMset(nciBiosign)
+#' 
+#' library(Biobase)
+#' sample_names.vc <- Biobase::sampleNames(nci.mds[["agilent"]])
+#' cancer_type.vc <- Biobase::pData(nci.mds[["agilent"]])[, "cancer"]
+#' nci.mds <- nci.mds[sample_names.vc[cancer_type.vc %in% c("ME", "LE")], ]
+#' 
+#' # Selecting the significant features for PLS-DA, RF, and SVM classifiers
+#' 
+#' nci_cancer.biosign <- biosign(nci.mds, "cancer", bootI = 5)
+#' 
+#' # Getting back the updated MultiDataSet
+#' 
+#' nci.mds <- getMset(nci_cancer.biosign)
+#' 
 #' @rdname biosign
 #' @export
 setGeneric("biosign", function(x,
