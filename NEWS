@@ -1,3 +1,11 @@
+CHANGES IN VERSION 1.24.2
+------------------------------
+
+NEW FEATURE
+
+    o biosign: now handles SummarizedExperiment and MultiAssayExperiment instances
+    o biosigner-vignette.Rmd: update
+
 CHANGES IN VERSION 1.19.2
 ------------------------------
 

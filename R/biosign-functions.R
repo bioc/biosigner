@@ -185,14 +185,14 @@ getBootTestIndF <- function(dataLs = NULL)
 getAccuracyF <- function(predTestFc = NULL,
                          yTestFc = NULL){
 
-    if (class(yTestFc) != "numeric") {
+    if (!is.numeric(yTestFc)) {
 
       yTestVc <- as.character(yTestFc)
       yClassVc <- unique(yTestVc)
       if (length(yClassVc) != 2)
         stop("Computing accuracy for 2-class discrimination only")
 
-      if (class(predTestFc) == "numeric")
+      if (is.numeric(predTestFc))
         stop("Predicted output is numeric and original output is not numeric (factor or character)")
       predTestVc <- as.character(predTestFc)
 
@@ -237,12 +237,12 @@ getBootModelF <- function(dataLs = NULL,
   if (bootI != 0) {
 
     for (i in 1:bootI) {
-
+ 
       # generate the bootstrap
       dataLs <- bootExtractF(dataLs,
                              bootSubSampL = TRUE,
                              respC = respC)
-
+      
       # generate the corresponding modelAccuRank
       modelAccuRank <- getModelAccuRankF(getBootTrainxF(dataLs),
                                          getBootTrainyF(dataLs, respC),
@@ -256,6 +256,7 @@ getBootModelF <- function(dataLs = NULL,
 
       modelAccuRank$ind.test <- getBootTestIndF(dataLs)
       ## add to the heap
+
       modelAccuRankLs <- c(modelAccuRankLs, list(modelAccuRank))
     }
   }
@@ -337,12 +338,12 @@ getImportanceF <- function(model = NULL,
                            ## predArgLs=NULL
                            ){
 
-    if (class(model) == "svm"){ ## weights (w)
+    if (inherits(model, "svm")){ ## weights (w)
 
         varImpVn <- (t(model[["coefs"]]) %*% xTrainMN[model[["index"]],])^2
 
     }
-    else if (class(model) == "opls"){ ## VIP
+    else if (inherits(model, "opls")){ ## VIP
 
         ## initialize
         varImpVn <- rep(0, ncol(xTrainMN))
@@ -352,7 +353,7 @@ getImportanceF <- function(model = NULL,
         varImpVn[vipVi] <- vipVn
 
     }
-    else if (class(model) == "randomForest"){
+    else if (inherits(model, "randomForest")){
 
         varImpVn <- model[["importance"]][, 1]
 
@@ -404,15 +405,11 @@ getModelF <- function(xMN = NULL,
     names(argFulLs) <- argNamFulVc
     ## generates the model from training set
     if (methC == "opls") {
-      optWrnN <- getOption("warn")
-      options(warn = -1)
-      model <- try(do.call(methC, argFulLs), silent = TRUE)
-      if (inherits(model, "try-error") &&
-          substr(unclass(attr(model, "condition"))$message, 1, 85) == "No model was built because the first predictive component was already not significant") {
+      model <- do.call(methC, argFulLs)
+      if (cumprod(dim(ropls::getSummaryDF(model)))[2] < 1) {
         argFulLs <- c(argFulLs, list(predI = 1))
         model <- do.call(methC, argFulLs)
       }
-      options(warn = optWrnN)
     } else
       model <- do.call(methC, argFulLs)
 

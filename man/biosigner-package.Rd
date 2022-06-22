@@ -17,33 +17,9 @@ datasets. A Galaxy implementation of the package is available within the
 Workflow4metabolomics.org online infrastructure for computational
 metabolomics.
 }
-\examples{
-
-## loading the diaplasma dataset
-
-data(diaplasma)
-attach(diaplasma)
-
-## restricting to a smaller dataset for this example
-
-featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
-dataMatrix <- dataMatrix[, featureSelVl]
-variableMetadata <- variableMetadata[featureSelVl, ]
-
-## signature selection for all 3 classifiers
-## a bootI = 5 number of bootstraps is used for this example
-## we recommend to keep the default bootI = 50 value for your analyzes
-
-set.seed(123)
-diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
-
-detach(diaplasma)
-
-}
 \author{
-Philippe Rinaudo <phd.rinaudo@gmail.com> and Etienne Thevenot
-<etienne.thevenot@cea.fr>.
+Philippe Rinaudo <phd.rinaudo@gmail.com> and Etienne A. Thevenot <etienne.thevenot@cea.fr>.
 
-Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>
+Maintainer: Etienne A. Thevenot <etienne.thevenot@cea.fr>
 }
 \keyword{package}

@@ -5,7 +5,7 @@
 \alias{getSignatureLs,biosign-method}
 \title{Signatures selected by the models}
 \usage{
-getSignatureLs(object, tierC = c("S", "AS")[1], ...)
+getSignatureLs(object, tierC = c("S", "AS")[1])
 
 \S4method{getSignatureLs}{biosign}(object, tierC = c("S", "AS")[1])
 }
@@ -15,8 +15,6 @@ getSignatureLs(object, tierC = c("S", "AS")[1], ...)
 
 \item{tierC}{Character: defines whether signatures from the 'S' tier only
 (default) or the ('S' and 'A') tiers should be returned}
-
-\item{...}{Currently not used.}
 }
 \value{
 List of 'S' (or 'S' and 'A') signatures for each classifier

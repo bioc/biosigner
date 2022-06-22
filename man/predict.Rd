@@ -5,7 +5,7 @@
 \alias{predict.biosign}
 \title{Predict method for 'biosign' signature objects}
 \usage{
-\S4method{predict}{biosign}(object, newdata, tierMaxC = "S", ...)
+\S4method{predict}{biosign}(object, newdata, tierMaxC = "S")
 }
 \arguments{
 \item{object}{An S4 object of class \code{biosign}, created by
@@ -17,8 +17,6 @@ only, with column names identical to the 'x' used for model training with
 
 \item{tierMaxC}{Character: Maximum level of tiers to display: Either 'S'or
 'A'.}
-
-\item{...}{Currently not used.}
 }
 \value{
 Data frame with the predictions for each classifier as factor

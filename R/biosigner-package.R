@@ -11,7 +11,9 @@
 #' Workflow4metabolomics.org online infrastructure for computational
 #' metabolomics.
 #'
-#' @import methods e1071 randomForest ropls
+#' @import methods e1071 randomForest ropls SummarizedExperiment
+#' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
+#' @importClassesFrom MultiDataSet MultiDataSet
 #' @importFrom Biobase ExpressionSet exprs pData
 #' @importFrom grDevices dev.new dev.off pdf png
 #' @importFrom graphics abline arrows axis box boxplot image layout mtext par rect title
@@ -21,33 +23,10 @@
 #' @name biosigner-package
 #' @aliases biosigner-package biosigner
 #' @docType package
-#' @author Philippe Rinaudo <phd.rinaudo@@gmail.com> and Etienne Thevenot
-#' <etienne.thevenot@@cea.fr>.
+#' @author Philippe Rinaudo <phd.rinaudo@@gmail.com> and Etienne A. Thevenot <etienne.thevenot@@cea.fr>.
 #'
-#' Maintainer: Philippe Rinaudo <phd.rinaudo@@gmail.com>
+#' Maintainer: Etienne A. Thevenot <etienne.thevenot@@cea.fr>
 #' @keywords package
-#' @examples
-#'
-#' ## loading the diaplasma dataset
-#'
-#' data(diaplasma)
-#' attach(diaplasma)
-#'
-#' ## restricting to a smaller dataset for this example
-#'
-#' featureSelVl <- variableMetadata[, "mzmed"] >= 490 & variableMetadata[, "mzmed"] < 500
-#' dataMatrix <- dataMatrix[, featureSelVl]
-#' variableMetadata <- variableMetadata[featureSelVl, ]
-#'
-#' ## signature selection for all 3 classifiers
-#' ## a bootI = 5 number of bootstraps is used for this example
-#' ## we recommend to keep the default bootI = 50 value for your analyzes
-#'
-#' set.seed(123)
-#' diaSign <- biosign(dataMatrix, sampleMetadata[, "type"], bootI = 5)
-#'
-#' detach(diaplasma)
-#'
 NULL
 
 

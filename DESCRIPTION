@@ -1,14 +1,14 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.24.0
-Date: 2020-11-18
-Author: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
-    <etienne.thevenot@cea.fr>
-Maintainer: Philippe Rinaudo <phd.rinaudo@gmail.com>, Etienne Thevenot
-    <etienne.thevenot@cea.fr>
+Version: 1.24.2
+Date: 2022-06-22
+Authors@R: 
+    c(person("Philippe", "Rinaudo", email = "phd.rinaudo@gmail.com", role = c("aut")),
+    person("Etienne A.", "Thevenot", email = "etienne.thevenot@cea.fr", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1019-4577")))
+Maintainer: Etienne A. Thevenot <etienne.thevenot@cea.fr>
 biocViews: Classification, FeatureExtraction, Transcriptomics,
-    Proteomics, Metabolomics, Lipidomics
+        Proteomics, Metabolomics, Lipidomics, MassSpectrometry
 Description: Feature selection is critical in omics data analysis to extract
     restricted and meaningful molecular signatures from complex and high-dimension
     data, and to build robust classifiers. This package implements a new method to
@@ -18,27 +18,19 @@ Description: Feature selection is critical in omics data analysis to extract
     models are returned, enabling future predictions on new datasets. A Galaxy
     implementation of the package is available within the Workflow4metabolomics.org
     online infrastructure for computational metabolomics.
-Depends:
-    Biobase,
-    ropls
-Imports:
-    methods,
-    e1071,
-    MultiDataSet,
-    randomForest
-Suggests:
-    BioMark,
-    BiocGenerics,
-    BiocStyle,
-    golubEsets,
-    hu6800.db,
-    knitr,
-    omicade4,
-    rmarkdown,
-    testthat
+Imports: Biobase, methods, e1071, grDevices, graphics,
+        MultiAssayExperiment, MultiDataSet, randomForest, ropls, stats,
+        SummarizedExperiment, utils
+Suggests: BioMark, BiocGenerics, BiocStyle, golubEsets, hu6800.db,
+        knitr, omicade4, rmarkdown, testthat
 VignetteBuilder: knitr
 License: CeCILL
+Encoding: UTF-8
 LazyLoad: yes
+URL: http://dx.doi.org/10.3389/fmolb.2016.00026
 NeedsCompilation: no
-Packaged: 2016-05-03 10:14:01 UTC; admin-local
-RoxygenNote: 7.1.1
+Packaged: 2022-06-22 20:48:51 UTC; ET207099
+RoxygenNote: 7.2.0
+Author: Philippe Rinaudo [aut],
+  Etienne A. Thevenot [aut, cre]
+    (<https://orcid.org/0000-0003-1019-4577>)
