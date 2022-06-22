@@ -11,7 +11,9 @@
 #' Workflow4metabolomics.org online infrastructure for computational
 #' metabolomics.
 #'
-#' @import methods e1071 randomForest ropls
+#' @import methods e1071 randomForest ropls SummarizedExperiment
+#' @importClassesFrom MultiAssayExperiment MultiAssayExperiment
+#' @importClassesFrom MultiDataSet MultiDataSet
 #' @importFrom Biobase ExpressionSet exprs pData
 #' @importFrom grDevices dev.new dev.off pdf png
 #' @importFrom graphics abline arrows axis box boxplot image layout mtext par rect title
