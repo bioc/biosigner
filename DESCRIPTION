@@ -1,7 +1,7 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.27.0
+Version: 1.28.0
 Date: 2022-06-22
 Authors@R:
     c(person("Philippe", "Rinaudo", email = "phd.rinaudo@gmail.com", role = c("aut")),
