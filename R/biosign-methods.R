@@ -696,20 +696,19 @@ setMethod("biosign", signature(x = "MultiDataSet"),
               
               plotL <- TRUE
               
-              setBiosign <- tryCatch(biosigner::biosign(x = x[[setC]],
-                                                        y = y,
-                                                        methodVc = methodVc,
-                                                        bootI = bootI,
-                                                        pvalN = pvalN,
-                                                        
-                                                        permI = permI,
-                                                        fixRankL = fixRankL,
-                                                        
-                                                        seedI = seedI,
-                                                        plotSubC = plotSubC,
-                                                        fig.pdfC = figPdfC,                   
-                                                        info.txtC = infTxtC),
-                                     error = function(e) NULL)
+              setBiosign <- biosigner::biosign(x = x[[setC]],
+                                               y = y,
+                                               methodVc = methodVc,
+                                               bootI = bootI,
+                                               pvalN = pvalN,
+                                               
+                                               permI = permI,
+                                               fixRankL = fixRankL,
+                                               
+                                               seedI = seedI,
+                                               plotSubC = plotSubC,
+                                               fig.pdfC = figPdfC,                   
+                                               info.txtC = infTxtC)
               
               if (all(is.na(setBiosign@accuracyMN["S", ]))) {
                 
@@ -1071,36 +1070,41 @@ setMethod("show",
           function(object)
           {
             
-            tierMaxC <- "S"
-            
-            ## if(is.null(object@accuracyMN)) {
-            if(all(is.na(object@accuracyMN["S", ]))) {
+            if (nrow(object@accuracyMN) < 1) {
               
-              cat("No significant variable found for the selected classifier(s): '", paste(object@methodVc, collapse = "', '"), "'\n", sep = "")
+              cat("Empty 'biosign' object\n")  
               
             } else {
               
-              tierFullVc <- c("S", "A", "B", "C", "D", "E")
+              tierMaxC <- "S"
               
-              if (any(!(tierMaxC %in% tierFullVc))) {
-                stop("'tierMaxC' argument must be in '", paste(tierFullVc, collapse = "', '"), "'", call. = FALSE)
-              } else
-                tierVc <- tierFullVc[1:which(tierFullVc == tierMaxC)]
-              
-              if (sum(object@tierMC %in% tierVc)) {
-                if (length(setdiff(tierVc, c(object@tierMC)))) {
-                  tierNotFoundVc <- tierFullVc[tierFullVc %in% setdiff(tierVc, c(object@tierMC))]
-                  warning("tierMC does not contain the following values: '", paste(tierNotFoundVc, collapse = "', '"), "'", call. = FALSE)
+              if (all(is.na(object@accuracyMN["S", ]))) {
+                
+                cat("No significant variable found for the selected classifier(s): '", paste(object@methodVc, collapse = "', '"), "'\n", sep = "")
+                
+              } else {
+                
+                tierFullVc <- c("S", "A", "B", "C", "D", "E")
+                
+                if (any(!(tierMaxC %in% tierFullVc))) {
+                  stop("'tierMaxC' argument must be in '", paste(tierFullVc, collapse = "', '"), "'", call. = FALSE)
+                } else
+                  tierVc <- tierFullVc[1:which(tierFullVc == tierMaxC)]
+                
+                if (sum(object@tierMC %in% tierVc)) {
+                  if (length(setdiff(tierVc, c(object@tierMC)))) {
+                    tierNotFoundVc <- tierFullVc[tierFullVc %in% setdiff(tierVc, c(object@tierMC))]
+                    warning("tierMC does not contain the following values: '", paste(tierNotFoundVc, collapse = "', '"), "'", call. = FALSE)
+                  }
+                  
+                  cat("Significant features from '", paste(tierVc, collapse = "', '"), "' groups:\n", sep = "")
+                  print(object@tierMC[apply(object@tierMC, 1, function(rowVc) sum(rowVc %in% tierVc) > 0), ,
+                                      drop = FALSE])
+                  
+                  cat("Accuracy:\n", sep = "")
+                  print(round(object@accuracyMN, 3))
+                  
                 }
-                
-                cat("Significant features from '", paste(tierVc, collapse = "', '"), "' groups:\n", sep = "")
-                print(object@tierMC[apply(object@tierMC, 1, function(rowVc) sum(rowVc %in% tierVc) > 0), ,
-                                    drop = FALSE])
-                
-                cat("Accuracy:\n", sep = "")
-                print(round(object@accuracyMN, 3))
-                
-                invisible(NULL)
                 
               }
               

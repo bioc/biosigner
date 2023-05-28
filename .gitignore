@@ -4,3 +4,4 @@
 .Ruserdata
 tests/testthat/*.pdf
 vignettes/figures/
+desktop.ini

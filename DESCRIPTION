@@ -1,8 +1,8 @@
 Package: biosigner
 Type: Package
 Title: Signature discovery from omics data
-Version: 1.29.0
-Date: 2022-06-22
+Version: 1.29.2
+Date: 2023-05-28
 Authors@R:
     c(person("Philippe", "Rinaudo", email = "phd.rinaudo@gmail.com", role = c("aut")),
     person("Etienne A.", "Thevenot", email = "etienne.thevenot@cea.fr", role = c("aut", "cre"), comment = c(ORCID = "0000-0003-1019-4577")))
@@ -48,4 +48,4 @@ LazyLoad: yes
 URL: http://dx.doi.org/10.3389/fmolb.2016.00026
 NeedsCompilation: no
 Packaged: 2016-05-03 10:14:01 UTC; admin-local
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.3
