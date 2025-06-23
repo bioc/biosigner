@@ -22,11 +22,10 @@
 #'
 #' @name biosigner-package
 #' @aliases biosigner-package biosigner
-#' @docType package
 #' @author Philippe Rinaudo <phd.rinaudo@@gmail.com> and Etienne A. Thevenot <etienne.thevenot@@cea.fr>.
 #'
 #' Maintainer: Etienne A. Thevenot <etienne.thevenot@@cea.fr>
 #' @keywords package
-NULL
+"_PACKAGE"
 
 

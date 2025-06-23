@@ -593,13 +593,11 @@ present in the matrix and 7 compounds aimed at achieving a final
 increase of 20%, 40% or 100% of the endogeneous concentrations. The
 authors identified 22 features (out of the 1,632 detected in the
 positive ionization mode; i.e. 1.3%) which came from the spiked
-compounds. The dataset is included in the
-[BioMark](https://cran.r-project.org/web/packages/BioMark/index.html) R
+compounds. The dataset is borrowed from the [BioMark](https://cran.r-project.org/web/packages/BioMark/index.html) R
 package [@Franceschi2012]. Let us use the *control* and *group1* samples
 (20 in total) in this study.
 
-```{r biomark, warning = FALSE, message = FALSE}
-library(BioMark)
+```{r apple, warning = FALSE, message = FALSE}
 data(SpikePos)
 group1Vi <- which(SpikePos[["classes"]] %in% c("control", "group1"))
 appleMN <- SpikePos[["data"]][group1Vi, ]
@@ -614,9 +612,9 @@ package for multivariate analysis, that:
 
 1.  no clear separation can be observed by PCA:
 
-```{r biomark_pca}
-biomark.pca <- ropls::opls(appleMN, fig.pdfC = "none")
-ropls::plot(biomark.pca, parAsColFcVn = spikeFc)
+```{r apple_pca}
+apple.pca <- ropls::opls(appleMN, fig.pdfC = "none")
+ropls::plot(apple.pca, parAsColFcVn = spikeFc)
 ```
 
 2.  PLS-DA modeling with the full dataset is not significant (as seen on
@@ -624,8 +622,8 @@ ropls::plot(biomark.pca, parAsColFcVn = spikeFc)
     permutations of the labels have Q2 values higher than the model
     trained with the true labels):
 
-```{r biomark_pls}
-biomark.pls <- ropls::opls(appleMN, spikeFc)
+```{r apple_pls}
+apple.pls <- ropls::opls(appleMN, spikeFc)
 ```
 
 Let us now extract the molecular signatures:

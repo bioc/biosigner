@@ -17,6 +17,13 @@ datasets. A Galaxy implementation of the package is available within the
 Workflow4metabolomics.org online infrastructure for computational
 metabolomics.
 }
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://dx.doi.org/10.3389/fmolb.2016.00026}
+}
+
+}
 \author{
 Philippe Rinaudo <phd.rinaudo@gmail.com> and Etienne A. Thevenot <etienne.thevenot@cea.fr>.
 
