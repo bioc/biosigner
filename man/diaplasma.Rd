@@ -6,18 +6,18 @@
 \title{Analysis of plasma from diabetic patients by LC-HRMS}
 \format{
 A list with the following elements:
-\itemize{
-\item dataMatrix: a 69 samples x
+\describe{
+\item{dataMatrix}{a 69 samples x
 5,501 features matrix of numeric type corresponding to the intensity
-profiles (values have been log10-transformed),
-\item sampleMetadata: a 69 x 3 data frame, with the patients' diabetic type
-('type', factor), age ('age', numeric), and body mass index ('bmi', numeric),
-\item variableMetadata: a 5,501 x 8 data frame, with the median m/z ('mzmed',
+profiles (values have been log10-transformed),}
+\item{sampleMetadata}{a 69 x 3 data frame, with the patients' diabetic type
+('type', factor), age ('age', numeric), and body mass index ('bmi', numeric),}
+\item{variableMetadata}{a 5,501 x 8 data frame, with the median m/z ('mzmed',
 numeric) and the median retention time in seconds ('rtmed', numeric) from
 XCMS, the 'isotopes' (character), 'adduct' (character) and 'pcgroups'
 (numeric) annotations from CAMERA, and the names of the m/z and RT matching
 compounds from an in-house database of pure spectra from commercial
-metabolites ('spiDb', character).
+metabolites ('spiDb', character).}
 }
 }
 \source{
