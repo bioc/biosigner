@@ -52,7 +52,7 @@ NULL
 #' corresponding to which spike-in compounds. Raw data in CDF format are available
 #' from the MetaboLights repository (MTBLS59).
 #'
-#' @name SpikedPos
+#' @name SpikePos
 #' @docType data
 #' @format 'SpikePos' is a list with the following three elements:
 #' \describe{
